@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Supervisor - PRISM{% endblock %}
+
+{% block content %}
+<div class="assign-container">
+    <div class="page-header">
+        <h1><i class="fas fa-user-plus"></i> Assign Academic Supervisors</h1>
+        <p>Assign supervisors to students for academic oversight and evaluation</p>
+    </div>
+
+    <form method="post" class="assign-form">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="student">Select Student</label>
+                <select id="student" name="student" required>
+                    <option value="">Choose a student</option>
+                    {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.username }} - {{ student.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="supervisor">Select Supervisor</label>
+                <select id="supervisor" name="supervisor" required>
+                    <option value="">Choose a supervisor</option>
+                    {% for supervisor in supervisors %}
+                    <option value="{{ supervisor.id }}">{{ supervisor.user.username }} - {{ supervisor.department }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="assignment-tips">
+            <h3><i class="fas fa-lightbulb"></i> Assignment Guidelines</h3>
+            <ul>
+                <li>Assign supervisors based on academic expertise and student major</li>
+                <li>Consider supervisor workload and availability</li>
+                <li>Ensure clear communication channels between supervisor and student</li>
+                <li>Supervisors will be responsible for final evaluations and grading</li>
+                <li>Assignments can be changed if needed during the internship period</li>
+            </ul>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Assign Supervisor
+            </button>
+            <a href="{% url 'accepted_students' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Students
+            </a>
+        </div>
+    </form>
+
+    <!-- Current Assignments -->
+    {% if supervisors %}
+    <div class="current-assignments">
+        <h2>Current Supervisor Assignments</h2>
+        <div class="assignments-grid">
+            {% for supervisor in supervisors %}
+            <div class="supervisor-card">
+                <div class="supervisor-header">
+                    <div class="supervisor-info">
+                        <h3>{{ supervisor.user.username }}</h3>
+                        <p class="department">{{ supervisor.department }} - {{ supervisor.title }}</p>
+                    </div>
+                    <div class="assignment-count">
+                        <span class="count">{{ supervisor.assignments.count }}</span>
+                        <span class="label">Students</span>
+                    </div>
+                </div>
+
+                {% if supervisor.assignments.all %}
+                <div class="assigned-students">
+                    <h4>Assigned Students</h4>
+                    <div class="students-list">
+                        {% for assignment in supervisor.assignments.all %}
+                        <div class="student-chip">
+                            <div class="student-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>{{ assignment.student.username }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-assignments">
+                    <p>No students assigned yet</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.assign-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.assign-form {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 3rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.form-group select {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.assignment-tips {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.assignment-tips h3 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.assignment-tips ul {
+    list-style: none;
+    padding: 0;
+}
+
+.assignment-tips li {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.assignment-tips li::before {
+    content: "✓";
+    color: var(--success-color);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.current-assignments {
+    margin-top: 3rem;
+}
+
+.current-assignments h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.assignments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.supervisor-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.supervisor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.supervisor-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.supervisor-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.department {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.assignment-count {
+    text-align: center;
+}
+
+.assignment-count .count {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.assignment-count .label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.assigned-students,
+.no-assignments {
+    padding: 1.5rem;
+}
+
+.assigned-students h4 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+}
+
+.students-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.student-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--light-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+}
+
+.student-avatar {
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.no-assignments {
+    text-align: center;
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .assign-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .assign-form {
+        padding: 1.5rem;
+    }
+
+    .assignment-tips {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .assignments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .supervisor-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .assignment-count {
+        text-align: left;
+    }
+
+    .students-list {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

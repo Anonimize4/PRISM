@@ -1,0 +1,663 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Logs - PRISM{% endblock %}
+
+{% block content %}
+<div class="system-logs">
+    <div class="page-header">
+        <h1><i class="fas fa-list-alt"></i> System Logs</h1>
+        <p>View and monitor system activity logs</p>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="level">Log Level</label>
+                    <select id="level" name="level">
+                        <option value="">All Levels</option>
+                        <option value="INFO" {% if level_filter == 'INFO' %}selected{% endif %}>Info</option>
+                        <option value="WARNING" {% if level_filter == 'WARNING' %}selected{% endif %}>Warning</option>
+                        <option value="ERROR" {% if level_filter == 'ERROR' %}selected{% endif %}>Error</option>
+                        <option value="CRITICAL" {% if level_filter == 'CRITICAL' %}selected{% endif %}>Critical</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="user">User</label>
+                    <input type="text" id="user" name="user" placeholder="Search by username"
+                           value="{{ user_filter }}">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'admin_app:system_logs' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Log Statistics -->
+    <div class="log-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ page_obj.paginator.count }}</div>
+            <div class="stat-label">Total Logs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ logs|length }}</div>
+            <div class="stat-label">Filtered Logs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ page_obj.paginator.num_pages }}</div>
+            <div class="stat-label">Pages</div>
+        </div>
+    </div>
+
+    <!-- Logs Table -->
+    {% if page_obj %}
+        <div class="logs-table">
+            <div class="table-header">
+                <h2>System Activity Logs</h2>
+                <div class="table-actions">
+                    <button class="btn btn-info" onclick="exportLogs()">
+                        <i class="fas fa-download"></i> Export Logs
+                    </button>
+                    <button class="btn btn-warning" onclick="clearOldLogs()">
+                        <i class="fas fa-trash"></i> Clear Old Logs
+                    </button>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Level</th>
+                        <th>User</th>
+                        <th>IP Address</th>
+                        <th>User Agent</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                    <tr class="log-row log-{{ log.level|lower }}">
+                        <td class="timestamp">{{ log.timestamp|date:"M d, Y H:i:s" }}</td>
+                        <td>
+                            <span class="level-badge level-{{ log.level|lower }}">
+                                {{ log.level }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if log.user %}
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span>{{ log.user.username }}</span>
+                                </div>
+                            {% else %}
+                                <span class="no-user">System</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.ip_address|default:"-" }}</td>
+                        <td>
+                            {% if log.user_agent %}
+                                <span class="user-agent" title="{{ log.user_agent }}">
+                                    {{ log.user_agent|truncatechars:30 }}
+                                </span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="message">{{ log.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            <div class="pagination-info">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} logs
+            </div>
+            <div class="pagination-controls">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if user_filter %}&user={{ user_filter }}{% endif %}"
+                       class="btn btn-secondary">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+
+                <span class="page-info">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if user_filter %}&user={{ user_filter }}{% endif %}"
+                       class="btn btn-secondary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-list-alt"></i>
+            </div>
+            <h3>No System Logs Found</h3>
+            <p>No logs match your current filters. Try adjusting your search criteria.</p>
+            <a href="{% url 'admin_app:system_logs' %}" class="btn btn-primary">
+                <i class="fas fa-times"></i> Clear Filters
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Log Analysis -->
+    <div class="log-analysis">
+        <h2>Log Analysis</h2>
+        <div class="analysis-grid">
+            <div class="analysis-card">
+                <div class="analysis-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="analysis-info">
+                    <h3>Info Logs</h3>
+                    <p class="analysis-value">{{ info_count|default:0 }}</p>
+                    <p class="analysis-desc">General information messages</p>
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="analysis-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="analysis-info">
+                    <h3>Warning Logs</h3>
+                    <p class="analysis-value">{{ warning_count|default:0 }}</p>
+                    <p class="analysis-desc">Potential issues detected</p>
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="analysis-icon error">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="analysis-info">
+                    <h3>Error Logs</h3>
+                    <p class="analysis-value">{{ error_count|default:0 }}</p>
+                    <p class="analysis-desc">System errors occurred</p>
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="analysis-icon critical">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="analysis-info">
+                    <h3>Critical Logs</h3>
+                    <p class="analysis-value">{{ critical_count|default:0 }}</p>
+                    <p class="analysis-desc">Critical system issues</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportLogs() {
+    // This would typically make an AJAX call to export logs
+    alert('Exporting system logs...');
+    // In a real implementation, this would trigger a download
+}
+
+function clearOldLogs() {
+    if (confirm('Are you sure you want to clear old logs? This action cannot be undone.')) {
+        alert('Clearing old system logs...');
+        // In a real implementation, this would trigger log cleanup
+    }
+}
+
+// Auto-refresh logs every 30 seconds
+setInterval(function() {
+    // In a real implementation, this would refresh the logs
+    console.log('Refreshing logs...');
+}, 30000);
+</script>
+
+<style>
+.system-logs {
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.filters-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.filters-form {
+    width: 100%;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.log-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.logs-table {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.table-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.log-row {
+    transition: background-color 0.3s ease;
+}
+
+.log-row:hover {
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.log-info .level-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.level-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+}
+
+.level-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.level-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.level-critical {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+    font-weight: 800;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.no-user {
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+.user-agent {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+}
+
+.message {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timestamp {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.pagination {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pagination-info {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-info {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.log-analysis {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.log-analysis h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.analysis-card {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.analysis-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.analysis-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.analysis-icon.warning { background: var(--warning-color); }
+.analysis-icon.error { background: var(--danger-color); }
+.analysis-icon.critical { background: #dc2626; }
+
+.analysis-info {
+    flex: 1;
+}
+
+.analysis-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.analysis-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.analysis-desc {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .system-logs {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+    .filter-actions .btn {
+        width: 100%;
+    }
+
+    .log-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .logs-table {
+        overflow-x: auto;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .table-actions .btn {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}

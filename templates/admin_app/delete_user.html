@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete User - PRISM{% endblock %}
+
+{% block content %}
+<div class="delete-user">
+    <div class="page-header">
+        <h1><i class="fas fa-exclamation-triangle"></i> Delete User</h1>
+        <p>Confirm user deletion - this action cannot be undone</p>
+    </div>
+
+    <div class="warning-card">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="warning-content">
+            <h2>Warning: Irreversible Action</h2>
+            <p>You are about to permanently delete this user account. This action cannot be undone and will result in the loss of all associated data.</p>
+        </div>
+    </div>
+
+    <div class="user-info-card">
+        <div class="user-header">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-details">
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <p>{{ user.email }}</p>
+                <div class="user-meta">
+                    <span class="role-badge role-{{ user.role }}">
+                        {{ user.get_role_display }}
+                    </span>
+                    <span class="status-badge {{ user.is_active|yesno:'active,inactive' }}">
+                        {{ user.is_active|yesno:'Active,Inactive' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="deletion-details">
+        <h3>What will be deleted?</h3>
+        <div class="deletion-items">
+            <div class="deletion-item">
+                <div class="item-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="item-content">
+                    <h4>User Account</h4>
+                    <p>Username, email, and basic profile information</p>
+                </div>
+            </div>
+
+            <div class="deletion-item">
+                <div class="item-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="item-content">
+                    <h4>Applications & Reports</h4>
+                    <p>All internship applications, weekly reports, and related documents</p>
+                </div>
+            </div>
+
+            <div class="deletion-item">
+                <div class="item-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="item-content">
+                    <h4>Messages & Communications</h4>
+                    <p>All messages, notifications, and communication history</p>
+                </div>
+            </div>
+
+            <div class="deletion-item">
+                <div class="item-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="item-content">
+                    <h4>Evaluations & Grades</h4>
+                    <p>All performance evaluations, grades, and assessment records</p>
+                </div>
+            </div>
+
+            <div class="deletion-item">
+                <div class="item-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="item-content">
+                    <h4>Activity Logs</h4>
+                    <p>All user activity logs and system audit trails</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirmation-section">
+        <h3>Confirmation Required</h3>
+        <p>To proceed with the deletion, please type the username "<strong>{{ user.username }}</strong>" in the field below:</p>
+
+        <form method="post" class="confirmation-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="confirmation">Type username to confirm:</label>
+                <input type="text" id="confirmation" name="confirmation" required
+                       placeholder="Enter username here" autocomplete="off">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Permanently Delete User
+                </button>
+                <a href="{% url 'admin_app:user_management' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationInput = document.getElementById('confirmation');
+    const submitButton = document.querySelector('.btn-danger');
+    const requiredUsername = '{{ user.username }}';
+
+    // Enable/disable submit button based on confirmation
+    confirmationInput.addEventListener('input', function() {
+        if (this.value === requiredUsername) {
+            submitButton.disabled = false;
+            submitButton.style.opacity = '1';
+        } else {
+            submitButton.disabled = true;
+            submitButton.style.opacity = '0.6';
+        }
+    });
+
+    // Initially disable submit button
+    submitButton.disabled = true;
+    submitButton.style.opacity = '0.6';
+
+    // Form validation
+    const form = document.querySelector('.confirmation-form');
+    form.addEventListener('submit', function(e) {
+        if (confirmationInput.value !== requiredUsername) {
+            e.preventDefault();
+            alert('Please type the correct username to confirm deletion.');
+            confirmationInput.focus();
+            return false;
+        }
+
+        if (!confirm('Are you absolutely sure you want to delete this user? This action cannot be undone.')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+
+<style>
+.delete-user {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.warning-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.warning-icon {
+    width: 60px;
+    height: 60px;
+    background: #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.warning-content h2 {
+    color: #92400e;
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+}
+
+.warning-content p {
+    color: #92400e;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.user-info-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.user-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.user-details h2 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.user-details p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+}
+
+.user-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-badge.role-student { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.role-badge.role-company { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.role-badge.role-university { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.role-badge.role-supervisor { background: rgba(139, 69, 19, 0.1); color: #8B4513; }
+.role-badge.role-mentor { background: rgba(147, 51, 234, 0.1); color: #9333EA; }
+.role-badge.role-admin { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.deletion-details {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.deletion-details h3 {
+    color: var(--dark-color);
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.deletion-items {
+    display: grid;
+    gap: 1rem;
+}
+
+.deletion-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.item-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--danger-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.item-content h4 {
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+}
+
+.item-content p {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.confirmation-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.confirmation-section h3 {
+    color: var(--dark-color);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.confirmation-section > p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.confirmation-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .delete-user {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .warning-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .user-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .deletion-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .confirmation-form {
+        margin: 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

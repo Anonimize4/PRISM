@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Project - PRISM{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Create Internship Project</h1>
+        <p>Define project objectives, timelines, and assign to teams</p>
+    </div>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title">Project Title</label>
+                <div class="input-group">
+                    <i class="fas fa-project-diagram"></i>
+                    <input type="text" id="title" name="title" required
+                           placeholder="Enter project title">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="team">Assign to Team</label>
+                <div class="input-group">
+                    <i class="fas fa-users"></i>
+                    <select id="team" name="team" required>
+                        <option value="">Select a team</option>
+                        {% for team in teams %}
+                        <option value="{{ team.id }}">{{ team.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <div class="input-group">
+                    <i class="fas fa-calendar-plus"></i>
+                    <input type="date" id="start_date" name="start_date" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <div class="input-group">
+                    <i class="fas fa-calendar-minus"></i>
+                    <input type="date" id="end_date" name="end_date" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="objectives">Project Objectives</label>
+            <div class="input-group">
+                <i class="fas fa-bullseye"></i>
+                <textarea id="objectives" name="objectives" rows="6" required
+                          placeholder="Describe the main objectives and goals of this project. What should the interns accomplish?"></textarea>
+            </div>
+        </div>
+
+        <div class="project-tips">
+            <h3><i class="fas fa-lightbulb"></i> Project Planning Tips</h3>
+            <ul>
+                <li>Define clear, measurable objectives that align with learning goals</li>
+                <li>Set realistic timelines based on project complexity and intern experience</li>
+                <li>Ensure projects have both technical and soft skill development components</li>
+                <li>Include regular check-ins and milestones for progress tracking</li>
+                <li>Consider scalability and potential for real-world application</li>
+            </ul>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Project
+            </button>
+            <a href="{% url 'project_management' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-container {
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: var(--secondary-color);
+}
+
+.auth-form {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group i {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    color: var(--secondary-color);
+    z-index: 1;
+}
+
+.input-group select,
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.input-group select:focus,
+.input-group input:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.project-tips {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.project-tips h3 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-tips ul {
+    list-style: none;
+    padding: 0;
+}
+
+.project-tips li {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.project-tips li::before {
+    content: "✓";
+    color: var(--success-color);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-container {
+        margin: 1rem;
+    }
+
+    .auth-form {
+        padding: 1.5rem;
+    }
+
+    .project-tips {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

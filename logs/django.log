@@ -1,0 +1,19 @@
+INFO 2025-10-02 22:03:11,939 autoreload 703766 139654313169152 Watching for file changes with StatReloader
+INFO 2025-10-02 22:11:21,193 autoreload 707326 140080457761024 Watching for file changes with StatReloader
+INFO 2025-10-02 22:30:51,869 autoreload 714437 140217426731264 Watching for file changes with StatReloader
+INFO 2025-10-02 22:33:16,189 autoreload 714437 140217426731264 /home/login/PRISM/notifications/admin.py changed, reloading.
+INFO 2025-10-02 22:33:17,000 autoreload 715654 140495341560064 Watching for file changes with StatReloader
+INFO 2025-10-02 22:33:37,741 autoreload 715855 140717512052992 Watching for file changes with StatReloader
+INFO 2025-10-02 22:40:52,193 autoreload 718429 140555445989632 Watching for file changes with StatReloader
+INFO 2025-10-02 22:45:16,781 autoreload 720506 140654219694336 Watching for file changes with StatReloader
+INFO 2025-10-02 22:57:58,250 autoreload 723363 140076475179264 Watching for file changes with StatReloader
+INFO 2025-10-02 22:59:19,657 autoreload 703766 139654313169152 /home/login/PRISM/prism_project/settings.py changed, reloading.
+INFO 2025-10-02 22:59:20,420 autoreload 718429 140555445989632 /home/login/PRISM/prism_project/settings.py changed, reloading.
+INFO 2025-10-02 22:59:20,448 autoreload 715654 140495341560064 /home/login/PRISM/prism_project/settings.py changed, reloading.
+INFO 2025-10-02 22:59:20,918 autoreload 724105 139919538249984 Watching for file changes with StatReloader
+INFO 2025-10-02 22:59:21,527 autoreload 724119 140582192021760 Watching for file changes with StatReloader
+INFO 2025-10-02 22:59:21,552 autoreload 724120 140414897377536 Watching for file changes with StatReloader
+INFO 2025-10-02 23:05:06,503 autoreload 726392 140507559883008 Watching for file changes with StatReloader
+INFO 2025-10-02 23:05:35,857 autoreload 726701 140054113640704 Watching for file changes with StatReloader
+INFO 2025-10-07 06:21:25,226 autoreload 620255 139905552711936 Watching for file changes with StatReloader
+INFO 2025-10-14 22:46:47,109 autoreload 97904 140653118898432 Watching for file changes with StatReloader

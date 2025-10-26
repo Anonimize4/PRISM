@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}University Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome to University Dashboard</h1>
+        <p>Monitor student performance and manage academic supervision</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Total Students</div>
+                    <div class="card-value">{{ total_students }}</div>
+                </div>
+                <div class="card-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <p class="card-description">Accepted interns</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Supervisors</div>
+                    <div class="card-value">{{ total_supervisors }}</div>
+                </div>
+                <div class="card-icon success">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            </div>
+            <p class="card-description">Academic supervisors</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Pending Assignments</div>
+                    <div class="card-value">{{ pending_assignments|length }}</div>
+                </div>
+                <div class="card-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <p class="card-description">Students without supervisors</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Recent Evaluations</div>
+                    <div class="card-value">{{ recent_evaluations|length }}</div>
+                </div>
+                <div class="card-icon info">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+            <p class="card-description">Final assessments</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Student Management</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'accepted_students' %}" class="btn btn-primary">
+                    <i class="fas fa-users"></i> View Students
+                </a>
+                <a href="{% url 'assign_supervisor' %}" class="btn btn-success">
+                    <i class="fas fa-user-plus"></i> Assign Supervisors
+                </a>
+                <a href="{% url 'supervisor_assignments' %}" class="btn btn-info">
+                    <i class="fas fa-list"></i> View Assignments
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Performance & Evaluation</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'performance_overview' %}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> Performance Overview
+                </a>
+                <a href="{% url 'final_evaluations' %}" class="btn btn-success">
+                    <i class="fas fa-graduation-cap"></i> Final Evaluations
+                </a>
+                <a href="{% url 'company_evaluations' %}" class="btn btn-warning">
+                    <i class="fas fa-building"></i> Company Feedback
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Students</h3>
+            </div>
+            {% if accepted_students %}
+                <div class="recent-list">
+                    {% for student in accepted_students %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ student.student.username }}</h4>
+                            <p>{{ student.company.username }} - {{ student.applied_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge accepted">Accepted</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'accepted_students' %}" class="btn btn-secondary btn-block">View All Students</a>
+            {% else %}
+                <p class="text-secondary">No accepted students yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Evaluations</h3>
+            </div>
+            {% if recent_evaluations %}
+                <div class="recent-list">
+                    {% for eval in recent_evaluations %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ eval.student.username }}</h4>
+                            <p>Grade: {{ eval.grade }} - {{ eval.evaluation_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge completed">Evaluated</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'final_evaluations' %}" class="btn btn-secondary btn-block">View All Evaluations</a>
+            {% else %}
+                <p class="text-secondary">No recent evaluations.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Communication & Analytics -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Communication</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'messaging' %}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Messages
+                </a>
+                <a href="{% url 'attendance_calendar' %}" class="btn btn-success">
+                    <i class="fas fa-calendar"></i> Attendance Calendar
+                </a>
+                <a href="{% url 'manage_supervisors' %}" class="btn btn-info">
+                    <i class="fas fa-user-cog"></i> Manage Supervisors
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Analytics & Reports</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'analytics_dashboard' %}" class="btn btn-primary">
+                    <i class="fas fa-chart-pie"></i> Analytics Dashboard
+                </a>
+                <a href="{% url 'export_performance_data' %}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export Data
+                </a>
+                <a href="{% url 'performance_overview' %}" class="btn btn-warning">
+                    <i class="fas fa-trophy"></i> Performance Metrics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.quick-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.recent-list {
+    margin-bottom: 1rem;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.recent-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: var(--dark-color);
+}
+
+.recent-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.accepted {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.completed {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .recent-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Performance Overview - PRISM{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Performance Overview</h1>
+        <div class="header-actions">
+            <a href="{% url 'export_performance_data' %}" class="btn btn-success">
+                <i class="fas fa-download"></i> Export Data
+            </a>
+            <a href="{% url 'analytics_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
+        </div>
+    </div>
+
+    <div class="performance-grid">
+        {% for data in student_data %}
+        <div class="performance-card">
+            <div class="student-info">
+                <h3>{{ data.student.get_full_name }}</h3>
+                <p class="student-email">{{ data.student.email }}</p>
+                {% if data.application %}
+                    <p class="company-info">
+                        <i class="fas fa-building"></i> {{ data.application.company.username }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="performance-metrics">
+                <div class="metric">
+                    <div class="metric-label">Attendance</div>
+                    <div class="metric-value attendance-{{ data.attendance_percentage|floatformat:0 }}">
+                        {{ data.attendance_percentage|floatformat:1 }}%
+                    </div>
+                </div>
+
+                {% if data.metrics %}
+                <div class="metric">
+                    <div class="metric-label">Performance Score</div>
+                    <div class="metric-value score-{{ data.metrics.performance_score|floatformat:0 }}">
+                        {{ data.metrics.performance_score|floatformat:1 }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="metric">
+                    <div class="metric-label">Status</div>
+                    <div class="status-badge {{ data.application.status|default:'pending' }}">
+                        {{ data.application.status|default:'Pending'|title }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="performance-actions">
+                <a href="{% url 'student_performance' data.student.id %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+                <a href="{% url 'create_final_evaluation' data.student.id %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-star"></i> Evaluate
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>No Students Found</h3>
+            <p>No students are currently enrolled in internships.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.performance-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.performance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.student-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-color);
+    font-size: 1.25rem;
+}
+
+.student-email {
+    color: var(--secondary-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.company-info {
+    color: var(--primary-color);
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+}
+
+.performance-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.metric {
+    text-align: center;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.attendance-90, .attendance-100, .score-90, .score-100 {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.attendance-70, .attendance-80, .score-70, .score-80 {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.attendance-0, .attendance-60, .score-0, .score-60 {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.accepted {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.performance-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.performance-actions .btn {
+    flex: 1;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--secondary-color);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-metrics {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Academic Information - PRISM{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Academic Information</h1>
+        <p>Provide your academic details to complete your profile</p>
+    </div>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="university">University</label>
+                <div class="input-group">
+                    <i class="fas fa-university"></i>
+                    <input type="text" id="university" name="university" required
+                           placeholder="Enter your university name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="major">Major/Field of Study</label>
+                <div class="input-group">
+                    <i class="fas fa-graduation-cap"></i>
+                    <input type="text" id="major" name="major" required
+                           placeholder="e.g., Computer Science, Business">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="year_of_study">Year of Study</label>
+                <div class="input-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <select id="year_of_study" name="year_of_study" required>
+                        <option value="">Select year of study</option>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                        <option value="5">Fifth Year or Higher</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gpa">GPA</label>
+                <div class="input-group">
+                    <i class="fas fa-chart-line"></i>
+                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4.0" required
+                           placeholder="e.g., 3.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="expected_graduation">Expected Graduation Date</label>
+                <div class="input-group">
+                    <i class="fas fa-calendar-check"></i>
+                    <input type="date" id="expected_graduation" name="expected_graduation" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="skills">Technical and Soft Skills</label>
+            <div class="input-group">
+                <i class="fas fa-tools"></i>
+                <textarea id="skills" name="skills" rows="4" required
+                          placeholder="List your technical skills (e.g., Python, JavaScript, SQL) and soft skills (e.g., communication, teamwork, problem-solving)"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="certifications">Certifications (Optional)</label>
+            <div class="input-group">
+                <i class="fas fa-certificate"></i>
+                <textarea id="certifications" name="certifications" rows="3"
+                          placeholder="List any relevant certifications you've obtained"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-save"></i> Save Academic Information
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: var(--secondary-color);
+}
+
+.auth-form {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group i {
+    position: absolute;
+    left: 1rem;
+    color: var(--secondary-color);
+    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-actions {
+    margin-top: 2rem;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-container {
+        margin: 1rem;
+    }
+
+    .auth-form {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Company Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+        <p>Manage your internship program and oversee student progress</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Total Applications</div>
+                    <div class="card-value">{{ total_applications }}</div>
+                </div>
+                <div class="card-icon primary">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+            </div>
+            <p class="card-description">Applications received</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Accepted Students</div>
+                    <div class="card-value">{{ accepted_applications }}</div>
+                </div>
+                <div class="card-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <p class="card-description">Active interns</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Pending Applications</div>
+                    <div class="card-value">{{ pending_applications }}</div>
+                </div>
+                <div class="card-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <p class="card-description">Awaiting review</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Active Teams</div>
+                    <div class="card-value">{{ teams|length }}</div>
+                </div>
+                <div class="card-icon info">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <p class="card-description">Project teams</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Application Management</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'manage_applications' %}" class="btn btn-primary">
+                    <i class="fas fa-file-alt"></i> Review Applications
+                </a>
+                <a href="{% url 'review_reports' %}" class="btn btn-success">
+                    <i class="fas fa-file-text"></i> Review Reports
+                </a>
+                <a href="{% url 'leave_requests' %}" class="btn btn-warning">
+                    <i class="fas fa-calendar-times"></i> Leave Requests
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Team & Project Management</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'create_team' %}" class="btn btn-primary">
+                    <i class="fas fa-users"></i> Create Team
+                </a>
+                <a href="{% url 'create_project' %}" class="btn btn-success">
+                    <i class="fas fa-project-diagram"></i> Create Project
+                </a>
+                <a href="{% url 'team_management' %}" class="btn btn-info">
+                    <i class="fas fa-tasks"></i> Manage Teams
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Applications</h3>
+            </div>
+            {% if applications %}
+                <div class="recent-list">
+                    {% for app in applications %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ app.student.username }}</h4>
+                            <p>Applied {{ app.applied_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge {{ app.status }}">{{ app.status }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'manage_applications' %}" class="btn btn-secondary btn-block">View All Applications</a>
+            {% else %}
+                <p class="text-secondary">No applications yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Pending Leave Requests</h3>
+            </div>
+            {% if pending_leave_requests %}
+                <div class="recent-list">
+                    {% for request in pending_leave_requests %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ request.student.username }}</h4>
+                            <p>{{ request.get_leave_type_display }} - {{ request.start_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge pending">Pending</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'leave_requests' %}" class="btn btn-secondary btn-block">View All Requests</a>
+            {% else %}
+                <p class="text-secondary">No pending leave requests.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Communication & Meetings -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Communication</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'messaging' %}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Messages
+                </a>
+                <a href="{% url 'schedule_meeting' %}" class="btn btn-success">
+                    <i class="fas fa-video"></i> Schedule Meeting
+                </a>
+                <a href="{% url 'meetings' %}" class="btn btn-info">
+                    <i class="fas fa-calendar"></i> View Meetings
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Analytics & Reports</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'reports_analytics' %}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> View Analytics
+                </a>
+                <a href="{% url 'student_evaluations' %}" class="btn btn-success">
+                    <i class="fas fa-star"></i> Student Evaluations
+                </a>
+                <a href="{% url 'notification_settings' %}" class="btn btn-warning">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.quick-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.recent-list {
+    margin-bottom: 1rem;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.recent-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: var(--dark-color);
+}
+
+.recent-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-badge.accepted {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.rejected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .recent-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

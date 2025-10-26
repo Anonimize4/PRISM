@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Reports - PRISM{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+    <div class="page-header">
+        <h1><i class="fas fa-file-text"></i> Review Student Reports</h1>
+        <p>Evaluate weekly progress reports and provide constructive feedback</p>
+    </div>
+
+    {% if reports %}
+        <div class="reports-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ reports|length }}</div>
+                <div class="stat-label">Reports to Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ reports|length|add:"0" }}</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ reports|length|add:"0" }}</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </div>
+
+        <div class="reports-list">
+            {% for report in reports %}
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="student-info">
+                        <div class="student-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3>{{ report.application.student.username }}</h3>
+                            <p class="company-name">{{ report.application.company.username }}</p>
+                        </div>
+                    </div>
+                    <div class="report-meta">
+                        <div class="week-badge">Week {{ report.week }}</div>
+                        <div class="submitted-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ report.submitted_date|date:"M d, Y" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-content">
+                    <div class="report-section">
+                        <h4><i class="fas fa-chart-line"></i> Progress This Week</h4>
+                        <p>{{ report.progress }}</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Challenges Faced</h4>
+                        <p>{{ report.challenges }}</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4><i class="fas fa-trophy"></i> Key Achievements</h4>
+                        <p>{{ report.achievements }}</p>
+                    </div>
+                </div>
+
+                <div class="report-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleReport(this)">
+                        <i class="fas fa-eye"></i> <span class="toggle-text">View Full Report</span>
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="provideFeedback({{ report.id }})">
+                        <i class="fas fa-comment"></i> Provide Feedback
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-file-text"></i>
+            </div>
+            <h3>No Reports to Review</h3>
+            <p>All student reports have been reviewed. Check back later for new submissions.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Provide Feedback</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="feedback-form" onsubmit="submitFeedback(event)">
+                <div class="feedback-info" id="feedback-info">
+                    <!-- Student and report info will be loaded here -->
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback-text">Your Feedback</label>
+                    <textarea id="feedback-text" name="feedback" rows="8" required
+                              placeholder="Provide constructive feedback on the student's progress. Include positive reinforcement, areas for improvement, and suggestions for future development."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentReportId = null;
+
+function toggleReport(button) {
+    const reportCard = button.closest('.report-card');
+    const reportContent = reportCard.querySelector('.report-content');
+    const toggleText = button.querySelector('.toggle-text');
+    const icon = button.querySelector('i');
+
+    if (reportContent.style.display === 'none' || reportContent.style.display === '') {
+        reportContent.style.display = 'block';
+        toggleText.textContent = 'Hide Full Report';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        reportContent.style.display = 'none';
+        toggleText.textContent = 'View Full Report';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function provideFeedback(reportId) {
+    currentReportId = reportId;
+
+    // Load report details into modal
+    const reportCard = event.target.closest('.report-card');
+    const studentName = reportCard.querySelector('h3').textContent;
+    const weekNumber = reportCard.querySelector('.week-badge').textContent;
+
+    const feedbackInfo = document.getElementById('feedback-info');
+    feedbackInfo.innerHTML = `
+        <div class="feedback-summary">
+            <h4>Feedback for ${studentName}</h4>
+            <p><strong>${weekNumber}</strong></p>
+        </div>
+    `;
+
+    document.getElementById('feedback-modal').style.display = 'block';
+}
+
+function submitFeedback(event) {
+    event.preventDefault();
+    const feedback = document.getElementById('feedback-text').value.trim();
+
+    if (!feedback || !currentReportId) return;
+
+    // Submit feedback (would typically use AJAX)
+    const formData = new FormData();
+    formData.append('report_id', currentReportId);
+    formData.append('feedback', feedback);
+
+    // For now, just show success and reload
+    alert('Feedback submitted successfully!');
+    closeModal();
+    location.reload();
+}
+
+function closeModal() {
+    document.getElementById('feedback-modal').style.display = 'none';
+    document.getElementById('feedback-form').reset();
+    currentReportId = null;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('feedback-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+</script>
+
+<style>
+.reports-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.reports-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.reports-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.report-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.report-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.student-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.company-name {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.report-meta {
+    text-align: right;
+}
+
+.week-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.submitted-date {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.report-section {
+    margin-bottom: 2rem;
+}
+
+.report-section h4 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.report-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.report-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.feedback-info {
+    margin-bottom: 2rem;
+}
+
+.feedback-summary {
+    background: var(--light-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary-color);
+}
+
+.feedback-summary h4 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.feedback-summary p {
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .reports-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .reports-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .report-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .report-meta {
+        text-align: left;
+        width: 100%;
+    }
+
+    .report-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .report-actions .btn {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supervisor Assignments - PRISM{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Supervisor Assignments</h1>
+        <div class="header-actions">
+            <a href="{% url 'assign_supervisor' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Assign Supervisor
+            </a>
+            <a href="{% url 'manage_supervisors' %}" class="btn btn-success">
+                <i class="fas fa-user-cog"></i> Manage Supervisors
+            </a>
+        </div>
+    </div>
+
+    {% if assignments %}
+    <div class="assignments-grid">
+        {% for assignment in assignments %}
+        <div class="assignment-card">
+            <div class="assignment-header">
+                <div class="student-section">
+                    <h3>{{ assignment.student.get_full_name }}</h3>
+                    <p class="student-email">{{ assignment.student.email }}</p>
+                    {% if assignment.student.applications.first %}
+                        <p class="company-info">
+                            <i class="fas fa-building"></i> 
+                            {{ assignment.student.applications.first.company.username }}
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div class="assignment-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <div class="supervisor-section">
+                    <h3>{{ assignment.supervisor.user.get_full_name }}</h3>
+                    <p class="supervisor-email">{{ assignment.supervisor.user.email }}</p>
+                    {% if assignment.supervisor.department %}
+                        <p class="department-info">
+                            <i class="fas fa-graduation-cap"></i> 
+                            {{ assignment.supervisor.department }}
+                        </p>
+                    {% endif %}
+                    {% if assignment.supervisor.specialization %}
+                        <p class="specialization-info">
+                            <i class="fas fa-star"></i> 
+                            {{ assignment.supervisor.specialization }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="assignment-meta">
+                <div class="assignment-date">
+                    <i class="fas fa-calendar"></i>
+                    Assigned: {{ assignment.assigned_date|date:"M d, Y" }}
+                </div>
+                <div class="assignment-status">
+                    <span class="status-badge active">Active</span>
+                </div>
+            </div>
+
+            <div class="assignment-actions">
+                <a href="{% url 'student_performance' assignment.student.id %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-chart-line"></i> View Performance
+                </a>
+                <a href="{% url 'create_final_evaluation' assignment.student.id %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-star"></i> Create Evaluation
+                </a>
+                <button class="btn btn-sm btn-danger" onclick="confirmRemoveAssignment({{ assignment.id }})">
+                    <i class="fas fa-times"></i> Remove
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="summary-section">
+        <h2>Assignment Summary</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ assignments|length }}</h3>
+                    <p>Total Assignments</p>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ assignments|length|add:0 }}</h3>
+                    <p>Active Supervisors</p>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ assignments|length|add:0 }}</h3>
+                    <p>Supervised Students</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-user-friends"></i>
+        <h3>No Supervisor Assignments</h3>
+        <p>No supervisors have been assigned to students yet.</p>
+        <a href="{% url 'assign_supervisor' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create First Assignment
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.assignments-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.assignment-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.assignment-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.student-section, .supervisor-section {
+    text-align: center;
+}
+
+.student-section h3, .supervisor-section h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+}
+
+.student-email, .supervisor-email {
+    color: var(--secondary-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.company-info, .department-info, .specialization-info {
+    color: var(--primary-color);
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.assignment-arrow {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.assignment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--light-bg);
+    border-radius: 8px;
+}
+
+.assignment-date {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.summary-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.summary-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--dark-color);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.summary-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.summary-content h3 {
+    font-size: 2rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-color);
+}
+
+.summary-content p {
+    margin: 0;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--secondary-color);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .assignment-header {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .assignment-arrow {
+        transform: rotate(90deg);
+    }
+
+    .assignment-actions {
+        flex-direction: column;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function confirmRemoveAssignment(assignmentId) {
+    if (confirm('Are you sure you want to remove this supervisor assignment?')) {
+        // Add AJAX call to remove assignment
+        fetch(`/university/remove-assignment/${assignmentId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

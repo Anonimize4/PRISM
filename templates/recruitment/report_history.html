@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report History - PRISM{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+    <div class="page-header">
+        <h1><i class="fas fa-history"></i> Weekly Report History</h1>
+        <p>View all your submitted weekly progress reports</p>
+    </div>
+
+    {% if application %}
+    <div class="application-info">
+        <div class="info-card">
+            <h3><i class="fas fa-building"></i> {{ application.company.username }}</h3>
+            <p><strong>Status:</strong> <span class="status-badge accepted">Accepted</span></p>
+            <p><strong>Applied:</strong> {{ application.applied_date|date:"M d, Y" }}</p>
+        </div>
+    </div>
+
+    {% if reports %}
+        <div class="reports-list">
+            {% for report in reports %}
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-title">
+                        <h3>Week {{ report.week }} Report</h3>
+                        <p class="report-date">Submitted {{ report.submitted_date|date:"M d, Y" }} at {{ report.submitted_date|time:"g:i A" }}</p>
+                    </div>
+                    <div class="report-status">
+                        {% if report.feedback %}
+                            <span class="feedback-badge">
+                                <i class="fas fa-check-circle"></i> Feedback Received
+                            </span>
+                        {% else %}
+                            <span class="pending-badge">
+                                <i class="fas fa-clock"></i> Awaiting Feedback
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="report-content">
+                    <div class="report-section">
+                        <h4><i class="fas fa-chart-line"></i> Progress This Week</h4>
+                        <p>{{ report.progress }}</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Challenges Faced</h4>
+                        <p>{{ report.challenges }}</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4><i class="fas fa-trophy"></i> Key Achievements</h4>
+                        <p>{{ report.achievements }}</p>
+                    </div>
+
+                    {% if report.feedback %}
+                    <div class="feedback-section">
+                        <h4><i class="fas fa-comment"></i> Supervisor Feedback</h4>
+                        <div class="feedback-content">
+                            <p>{{ report.feedback }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="report-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleReport(this)">
+                        <i class="fas fa-eye"></i> <span class="toggle-text">View Details</span>
+                    </button>
+                    {% if not report.feedback %}
+                        <a href="{% url 'submit_weekly_report' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Update Report
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="reports-summary">
+            <div class="summary-card">
+                <h3>Report Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat">
+                        <span class="stat-number">{{ reports|length }}</span>
+                        <span class="stat-label">Total Reports</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ reports|length|add:"0" }}</span>
+                        <span class="stat-label">Weeks Completed</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ reports|length }}</span>
+                        <span class="stat-label">Feedback Received</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>No Reports Yet</h3>
+            <p>You haven't submitted any weekly reports yet. Start by submitting your first report.</p>
+            <a href="{% url 'submit_weekly_report' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Submit First Report
+            </a>
+        </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <h3>No Active Internship</h3>
+        <p>You need an accepted internship application to view report history.</p>
+        <a href="{% url 'application_status' %}" class="btn btn-primary">
+            <i class="fas fa-eye"></i> View Applications
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleReport(button) {
+    const reportCard = button.closest('.report-card');
+    const reportContent = reportCard.querySelector('.report-content');
+    const toggleText = button.querySelector('.toggle-text');
+    const icon = button.querySelector('i');
+
+    if (reportContent.style.display === 'none' || reportContent.style.display === '') {
+        reportContent.style.display = 'block';
+        toggleText.textContent = 'Hide Details';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        reportContent.style.display = 'none';
+        toggleText.textContent = 'View Details';
+        icon.className = 'fas fa-eye';
+    }
+}
+</script>
+
+<style>
+.reports-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.application-info {
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border-left: 4px solid var(--primary-color);
+}
+
+.info-card h3 {
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.info-card p {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.reports-list {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.report-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.report-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-title h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.report-date {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.feedback-badge {
+    background: var(--success-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pending-badge {
+    background: var(--warning-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.report-section {
+    margin-bottom: 2rem;
+}
+
+.report-section h4 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.report-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.feedback-section {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feedback-section h4 {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.feedback-content {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--success-color);
+}
+
+.feedback-content p {
+    color: var(--dark-color);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.report-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.reports-summary {
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.summary-card h3 {
+    color: var(--dark-color);
+    margin-bottom: 2rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .reports-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .report-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .report-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .report-actions .btn {
+        width: 100%;
+    }
+
+    .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

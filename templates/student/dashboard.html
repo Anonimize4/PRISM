@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+        <p>Manage your internship journey and track your progress</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Active Applications</div>
+                    <div class="card-value">{{ applications|length }}</div>
+                </div>
+                <div class="card-icon primary">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+            </div>
+            <p class="card-description">Applications you've submitted</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Accepted Internships</div>
+                    <div class="card-value">{{ accepted_applications }}</div>
+                </div>
+                <div class="card-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <p class="card-description">Internships you've been accepted for</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Pending Reports</div>
+                    <div class="card-value">{{ pending_reports|length }}</div>
+                </div>
+                <div class="card-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <p class="card-description">Reports awaiting feedback</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Unread Notifications</div>
+                    <div class="card-value">{{ unread_count }}</div>
+                </div>
+                <div class="card-icon info">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+            <p class="card-description">New messages and updates</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Quick Actions</h3>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'create_application' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Apply for Internship
+                </a>
+                <a href="{% url 'submit_weekly_report' %}" class="btn btn-success">
+                    <i class="fas fa-file-text"></i> Submit Report
+                </a>
+                <a href="{% url 'messaging' %}" class="btn btn-info">
+                    <i class="fas fa-envelope"></i> Messages
+                </a>
+                <a href="{% url 'notifications' %}" class="btn btn-warning">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Applications</h3>
+            </div>
+            {% if applications %}
+                <div class="recent-list">
+                    {% for app in applications %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ app.company.username }}</h4>
+                            <p>Applied on {{ app.applied_date|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge {{ app.status }}">{{ app.status }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'application_status' %}" class="btn btn-secondary btn-block">View All Applications</a>
+            {% else %}
+                <p class="text-secondary">No applications yet. <a href="{% url 'create_application' %}">Create your first application</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Notifications</h3>
+            </div>
+            {% if notifications %}
+                <div class="recent-list">
+                    {% for notification in notifications %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>{{ notification.title }}</h4>
+                            <p>{{ notification.message|truncatechars:100 }}</p>
+                            <small>{{ notification.created_at|timesince }} ago</small>
+                        </div>
+                        {% if not notification.is_read %}
+                        <span class="badge badge-primary">New</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'notifications' %}" class="btn btn-secondary btn-block">View All Notifications</a>
+            {% else %}
+                <p class="text-secondary">No recent notifications</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Upcoming Deadlines</h3>
+            </div>
+            {% if upcoming_deadlines %}
+                <div class="recent-list">
+                    {% for deadline in upcoming_deadlines %}
+                    <div class="recent-item">
+                        <div class="recent-content">
+                            <h4>Leave Request</h4>
+                            <p>From {{ deadline.start_date }} to {{ deadline.end_date }}</p>
+                            <small>Status: {{ deadline.status }}</small>
+                        </div>
+                        <span class="status-badge {{ deadline.status }}">{{ deadline.status }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'leave_requests' %}" class="btn btn-secondary btn-block">View All Requests</a>
+            {% else %}
+                <p class="text-secondary">No upcoming deadlines</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.quick-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.recent-list {
+    margin-bottom: 1rem;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.recent-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: var(--dark-color);
+}
+
+.recent-content p {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.recent-content small {
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .recent-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

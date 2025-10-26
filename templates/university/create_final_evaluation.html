@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Final Evaluation - PRISM{% endblock %}
+
+{% block content %}
+<div class="evaluation-container">
+    <div class="page-header">
+        <h1><i class="fas fa-star"></i> Create Final Evaluation</h1>
+        <p>Submit final evaluation and grade for {{ student.username }}'s internship</p>
+    </div>
+
+    <form method="post" class="evaluation-form">
+        {% csrf_token %}
+
+        <!-- Student Information -->
+        <div class="student-info-card">
+            <div class="student-header">
+                <div class="student-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="student-details">
+                    <h2>{{ student.username }}</h2>
+                    <p>{{ student.email }}</p>
+                    {% if student.supervisor_assignments.first %}
+                    <p class="supervisor">
+                        <i class="fas fa-user-tie"></i>
+                        Supervisor: {{ student.supervisor_assignments.first.supervisor.user.username }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Form -->
+        <div class="form-section">
+            <h3>Final Grade</h3>
+            <div class="form-group">
+                <label for="grade">Grade</label>
+                <select id="grade" name="grade" required>
+                    <option value="">Select Grade</option>
+                    <option value="A+">A+ (Excellent)</option>
+                    <option value="A">A (Very Good)</option>
+                    <option value="A-">A- (Good)</option>
+                    <option value="B+">B+ (Above Average)</option>
+                    <option value="B">B (Average)</option>
+                    <option value="B-">B- (Below Average)</option>
+                    <option value="C+">C+ (Satisfactory)</option>
+                    <option value="C">C (Pass)</option>
+                    <option value="F">F (Fail)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Performance Assessment</h3>
+            <div class="assessment-grid">
+                <div class="assessment-item">
+                    <label for="attendance_score">Attendance & Punctuality</label>
+                    <div class="score-input">
+                        <input type="number" id="attendance_score" name="attendance_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+
+                <div class="assessment-item">
+                    <label for="technical_score">Technical Skills</label>
+                    <div class="score-input">
+                        <input type="number" id="technical_score" name="technical_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+
+                <div class="assessment-item">
+                    <label for="communication_score">Communication Skills</label>
+                    <div class="score-input">
+                        <input type="number" id="communication_score" name="communication_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+
+                <div class="assessment-item">
+                    <label for="teamwork_score">Teamwork & Collaboration</label>
+                    <div class="score-input">
+                        <input type="number" id="teamwork_score" name="teamwork_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+
+                <div class="assessment-item">
+                    <label for="initiative_score">Initiative & Problem Solving</label>
+                    <div class="score-input">
+                        <input type="number" id="initiative_score" name="initiative_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+
+                <div class="assessment-item">
+                    <label for="professionalism_score">Professionalism</label>
+                    <div class="score-input">
+                        <input type="number" id="professionalism_score" name="professionalism_score"
+                               min="1" max="10" placeholder="1-10" required>
+                        <span class="score-label">/10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Final Feedback</h3>
+            <div class="form-group">
+                <label for="final_feedback">Overall Feedback</label>
+                <textarea id="final_feedback" name="final_feedback" rows="6"
+                          placeholder="Provide comprehensive feedback on the student's internship performance, achievements, areas for improvement, and recommendations for future development..." required></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Recommendations</h3>
+            <div class="form-group">
+                <label for="recommendations">Recommendations for Future Employment</label>
+                <textarea id="recommendations" name="recommendations" rows="4"
+                          placeholder="Provide recommendations for future employment opportunities, career development, or further education..." required></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Submit Evaluation
+            </button>
+            <a href="{% url 'student_performance' student.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Performance
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.evaluation-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.student-info-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.student-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.student-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.student-details h2 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.student-details p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+}
+
+.supervisor {
+    color: var(--success-color);
+    margin: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.evaluation-form {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h3::before {
+    content: "📝";
+    font-size: 1.2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 1rem;
+}
+
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.assessment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.assessment-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.assessment-item label {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 0.95rem;
+}
+
+.score-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-input input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+.score-input input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.score-label {
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .evaluation-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .student-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .evaluation-form {
+        padding: 1.5rem;
+    }
+
+    .assessment-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

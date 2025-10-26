@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave Requests - PRISM{% endblock %}
+
+{% block content %}
+<div class="leave-container">
+    <div class="page-header">
+        <h1><i class="fas fa-calendar-times"></i> Leave Requests</h1>
+        <p>Manage your leave requests and view their status</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-bar">
+        <a href="{% url 'submit_leave_request' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Submit New Request
+        </a>
+    </div>
+
+    {% if requests %}
+        <div class="requests-list">
+            {% for request in requests %}
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-info">
+                        <h3>{{ request.get_leave_type_display }}</h3>
+                        <p class="request-dates">
+                            <i class="fas fa-calendar"></i>
+                            {{ request.start_date|date:"M d, Y" }} - {{ request.end_date|date:"M d, Y" }}
+                        </p>
+                        {% if user.role == 'student' %}
+                        <p class="request-company">
+                            <i class="fas fa-building"></i>
+                            {{ request.application.company.username }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="request-status">
+                        <span class="status-badge {{ request.status }}">
+                            {{ request.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="request-content">
+                    <div class="request-section">
+                        <h4>Reason</h4>
+                        <p>{{ request.reason }}</p>
+                    </div>
+
+                    {% if request.status == 'approved' or request.status == 'rejected' %}
+                    <div class="request-decision">
+                        <h4>Decision</h4>
+                        <p class="decision-text {{ request.status }}">
+                            Your leave request has been <strong>{{ request.get_status_display|lower }}</strong>.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="request-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Submitted:</span>
+                        <span class="meta-value">{{ request.start_date|date:"M d, Y" }}</span>
+                    </div>
+                    {% if request.status == 'approved' %}
+                    <div class="meta-item">
+                        <span class="meta-label">Duration:</span>
+                        <span class="meta-value">{{ request.start_date|timesince:request.end_date|cut:" ago" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="request-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleRequest(this)">
+                        <i class="fas fa-eye"></i> <span class="toggle-text">View Details</span>
+                    </button>
+                    {% if request.status == 'pending' %}
+                        <button class="btn btn-warning btn-sm" onclick="editRequest({{ request.id }})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="requests-summary">
+            <div class="summary-card">
+                <h3>Leave Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat">
+                        <span class="stat-number">{{ requests|length }}</span>
+                        <span class="stat-label">Total Requests</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ requests|length|add:"0" }}</span>
+                        <span class="stat-label">Approved</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ requests|length|add:"0" }}</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ requests|length|add:"0" }}</span>
+                        <span class="stat-label">Rejected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+            <h3>No Leave Requests</h3>
+            <p>You haven't submitted any leave requests yet.</p>
+            <a href="{% url 'submit_leave_request' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Submit First Request
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleRequest(button) {
+    const requestCard = button.closest('.request-card');
+    const requestContent = requestCard.querySelector('.request-content');
+    const toggleText = button.querySelector('.toggle-text');
+    const icon = button.querySelector('i');
+
+    if (requestContent.style.display === 'none' || requestContent.style.display === '') {
+        requestContent.style.display = 'block';
+        toggleText.textContent = 'Hide Details';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        requestContent.style.display = 'none';
+        toggleText.textContent = 'View Details';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function editRequest(requestId) {
+    // Redirect to edit page or show edit modal
+    window.location.href = `/recruitment/student/submit-leave-request/?edit=${requestId}`;
+}
+</script>
+
+<style>
+.leave-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.actions-bar {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.requests-list {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.request-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.request-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.request-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.request-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.request-dates,
+.request-company {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-badge.approved {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.rejected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.request-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.request-section {
+    margin-bottom: 2rem;
+}
+
+.request-section h4 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.request-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.request-decision {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.request-decision h4 {
+    margin-bottom: 1rem;
+}
+
+.decision-text.approved {
+    color: var(--success-color);
+}
+
+.decision-text.rejected {
+    color: var(--danger-color);
+}
+
+.request-meta {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 2rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.meta-label {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.meta-value {
+    color: var(--dark-color);
+    font-size: 0.9rem;
+}
+
+.request-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.requests-summary {
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.summary-card h3 {
+    color: var(--dark-color);
+    margin-bottom: 2rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .leave-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .request-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .request-meta {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .request-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .request-actions .btn {
+        width: 100%;
+    }
+
+    .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-user-graduate"></i> Student Dashboard</h1>
+    <p>Welcome back, {{ user.username }}!</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Applications Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Applications</h3>
+            <div class="card-icon primary">
+                <i class="fas fa-file-alt"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ total_applications }}</div>
+        <p class="card-description">Total Applications</p>
+        <div style="margin-top: 1rem;">
+            <div class="status-badge accepted">{{ accepted_applications }} Accepted</div>
+            <div class="status-badge pending">{{ pending_applications }} Pending</div>
+        </div>
+        <a href="{% url 'create_application' %}" class="btn btn-primary btn-block mt-3">
+            <i class="fas fa-plus"></i> New Application
+        </a>
+    </div>
+
+    <!-- Reports Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Reports</h3>
+            <div class="card-icon warning">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ pending_reports|length }}</div>
+        <p class="card-description">Pending Reports</p>
+        <a href="{% url 'submit_weekly_report' %}" class="btn btn-warning btn-block mt-3">
+            <i class="fas fa-upload"></i> Submit Report
+        </a>
+        <a href="{% url 'report_history' %}" class="btn btn-secondary btn-block mt-2">
+            <i class="fas fa-history"></i> View History
+        </a>
+    </div>
+
+    <!-- Notifications Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Notifications</h3>
+            <div class="card-icon info">
+                <i class="fas fa-bell"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ notifications|length }}</div>
+        <p class="card-description">Recent Notifications</p>
+        <a href="{% url 'notifications' %}" class="btn btn-info btn-block mt-3">
+            <i class="fas fa-envelope"></i> View All
+        </a>
+    </div>
+
+    <!-- Leave Requests Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Leave Management</h3>
+            <div class="card-icon success">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ upcoming_deadlines|length }}</div>
+        <p class="card-description">Upcoming Deadlines</p>
+        <a href="{% url 'submit_leave_request' %}" class="btn btn-success btn-block mt-3">
+            <i class="fas fa-plus"></i> Request Leave
+        </a>
+        <a href="{% url 'leave_requests' %}" class="btn btn-secondary btn-block mt-2">
+            <i class="fas fa-list"></i> View Requests
+        </a>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Recent Applications</h3>
+        <a href="{% url 'application_status' %}" class="btn btn-primary btn-sm">View All</a>
+    </div>
+    <div class="table-container">
+        {% if applications %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Applied Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.company.username }}</td>
+                    <td><span class="status-badge {{ app.status }}">{{ app.status }}</span></td>
+                    <td>{{ app.applied_date|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-secondary">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center p-4">
+            <p class="text-secondary">No applications found. Create your first application!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="dashboard-grid">
+        <a href="{% url 'messaging' %}" class="card text-decoration-none">
+            <div class="card-icon primary">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h4>Messages</h4>
+            <p class="text-secondary">Communicate with mentors and companies</p>
+        </a>
+        
+        <a href="{% url 'view_profile' %}" class="card text-decoration-none">
+            <div class="card-icon success">
+                <i class="fas fa-user"></i>
+            </div>
+            <h4>My Profile</h4>
+            <p class="text-secondary">Update your personal information</p>
+        </a>
+        
+        <a href="{% url 'documents' %}" class="card text-decoration-none">
+            <div class="card-icon warning">
+                <i class="fas fa-folder"></i>
+            </div>
+            <h4>Documents</h4>
+            <p class="text-secondary">Manage your files and certificates</p>
+        </a>
+        
+        <a href="{% url 'internship_preferences' %}" class="card text-decoration-none">
+            <div class="card-icon info">
+                <i class="fas fa-cog"></i>
+            </div>
+            <h4>Preferences</h4>
+            <p class="text-secondary">Update your internship preferences</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

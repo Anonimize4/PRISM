@@ -1,0 +1,635 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Performance - PRISM{% endblock %}
+
+{% block content %}
+<div class="performance-container">
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> Student Performance Overview</h1>
+        <p>Monitor {{ student.username }}'s internship progress and performance metrics</p>
+    </div>
+
+    <!-- Student Info Card -->
+    <div class="student-info-card">
+        <div class="student-header">
+            <div class="student-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="student-details">
+                <h2>{{ student.username }}</h2>
+                <p>{{ student.email }}</p>
+                {% if student.supervisor_assignments.first %}
+                <p class="supervisor">
+                    <i class="fas fa-user-tie"></i>
+                    Supervisor: {{ student.supervisor_assignments.first.supervisor.user.username }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="metrics-section">
+        <h2>Performance Metrics</h2>
+        {% if performance_metrics %}
+            <div class="metrics-grid">
+                {% for metric in performance_metrics %}
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h3>{{ metric.evaluation_date|date:"M d, Y" }}</h3>
+                        <div class="metric-scores">
+                            <div class="score-item">
+                                <span class="score-label">Attendance</span>
+                                <span class="score-value">{{ metric.attendance_percentage }}%</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Report Quality</span>
+                                <span class="score-value">{{ metric.report_quality_score }}/10</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Communication</span>
+                                <span class="score-value">{{ metric.communication_score }}/10</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Technical Skills</span>
+                                <span class="score-value">{{ metric.technical_skills_score }}/10</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if metric.comments %}
+                    <div class="metric-comments">
+                        <p>{{ metric.comments }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>No Performance Metrics Yet</h3>
+                <p>Performance metrics will be available once evaluations are conducted.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Weekly Reports -->
+    <div class="reports-section">
+        <h2>Weekly Reports</h2>
+        {% if reports %}
+            <div class="reports-list">
+                {% for report in reports %}
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Week {{ report.week }} Report</h3>
+                        <p class="report-date">{{ report.submitted_date|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="report-content">
+                        <div class="report-section">
+                            <h4>Progress</h4>
+                            <p>{{ report.progress }}</p>
+                        </div>
+                        <div class="report-section">
+                            <h4>Challenges</h4>
+                            <p>{{ report.challenges }}</p>
+                        </div>
+                        <div class="report-section">
+                            <h4>Achievements</h4>
+                            <p>{{ report.achievements }}</p>
+                        </div>
+                        {% if report.feedback %}
+                        <div class="report-feedback">
+                            <h4>Supervisor Feedback</h4>
+                            <p>{{ report.feedback }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-file-text"></i>
+                </div>
+                <h3>No Reports Submitted</h3>
+                <p>The student hasn't submitted any weekly reports yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Company Evaluations -->
+    <div class="evaluations-section">
+        <h2>Company Evaluations</h2>
+        {% if company_evaluations %}
+            <div class="evaluations-list">
+                {% for evaluation in company_evaluations %}
+                <div class="evaluation-card">
+                    <div class="evaluation-header">
+                        <h3>{{ evaluation.evaluator.user.username }}</h3>
+                        <p class="evaluation-date">{{ evaluation.evaluation_date|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="evaluation-content">
+                        <div class="evaluation-scores">
+                            <div class="score-item">
+                                <span class="score-label">Performance</span>
+                                <span class="score-value">{{ evaluation.performance_rating }}/10</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Technical Skills</span>
+                                <span class="score-value">{{ evaluation.technical_skills }}/10</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Communication</span>
+                                <span class="score-value">{{ evaluation.communication_skills }}/10</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Teamwork</span>
+                                <span class="score-value">{{ evaluation.teamwork }}/10</span>
+                            </div>
+                        </div>
+                        {% if evaluation.overall_feedback %}
+                        <div class="evaluation-feedback">
+                            <h4>Overall Feedback</h4>
+                            <p>{{ evaluation.overall_feedback }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3>No Company Evaluations</h3>
+                <p>No evaluations have been received from the company yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Attendance Overview -->
+    <div class="attendance-section">
+        <h2>Attendance Overview</h2>
+        <div class="attendance-summary">
+            <div class="attendance-card">
+                <div class="attendance-stat">
+                    <span class="stat-number">{{ attendance_percentage|floatformat:1 }}%</span>
+                    <span class="stat-label">Attendance Rate</span>
+                </div>
+                <div class="attendance-details">
+                    <p>Total Days: {{ attendance_records|length }}</p>
+                    <p>Present: {{ attendance_records|length|add:"0" }}</p>
+                    <p>Absent: {{ attendance_records|length|add:"0" }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if attendance_records %}
+            <div class="attendance-records">
+                <h3>Recent Attendance</h3>
+                <div class="attendance-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in attendance_records %}
+                            <tr>
+                                <td>{{ record.date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="status-badge {{ record.status }}">
+                                        {{ record.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ record.notes|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-section">
+        <a href="{% url 'create_final_evaluation' student.id %}" class="btn btn-primary">
+            <i class="fas fa-star"></i> Create Final Evaluation
+        </a>
+        <a href="{% url 'accepted_students' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Students
+        </a>
+    </div>
+</div>
+
+<style>
+.performance-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.student-info-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.student-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.student-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.student-details h2 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.student-details p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+}
+
+.supervisor {
+    color: var(--success-color);
+    margin: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.metrics-section,
+.reports-section,
+.evaluations-section,
+.attendance-section {
+    margin-bottom: 3rem;
+}
+
+.metrics-section h2,
+.reports-section h2,
+.evaluations-section h2,
+.attendance-section h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.metric-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.metric-header h3 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.metric-scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.score-item {
+    text-align: center;
+    padding: 0.75rem;
+    background: white;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.score-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.score-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.metric-comments {
+    padding: 1.5rem;
+}
+
+.metric-comments p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.reports-list,
+.evaluations-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.report-card,
+.evaluation-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.report-header,
+.evaluation-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-header h3,
+.evaluation-header h3 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.report-date,
+.evaluation-date {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.report-content,
+.evaluation-content {
+    padding: 1.5rem;
+}
+
+.report-section,
+.evaluation-scores {
+    margin-bottom: 2rem;
+}
+
+.report-section h4,
+.evaluation-scores h4 {
+    color: var(--dark-color);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.report-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.report-feedback,
+.evaluation-feedback {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.report-feedback h4,
+.evaluation-feedback h4 {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.attendance-summary {
+    margin-bottom: 2rem;
+}
+
+.attendance-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.attendance-stat .stat-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.attendance-stat .stat-label {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.attendance-details {
+    margin-top: 1rem;
+}
+
+.attendance-details p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+}
+
+.attendance-records {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.attendance-records h3 {
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.attendance-table {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.present {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.absent {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.status-badge.late {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.actions-section {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.actions-section .btn {
+    margin: 0 1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .performance-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .student-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-scores {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .reports-list,
+    .evaluations-list {
+        gap: 1rem;
+    }
+
+    .report-header,
+    .evaluation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .actions-section .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}

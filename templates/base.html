@@ -1,0 +1,828 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PRISM - Internship Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/enhanced-animations.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{% url 'home' %}">PRISM</a>
+            </div>
+            
+            {% if user.is_authenticated %}
+            <div class="nav-menu">
+                <div class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link">Home</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'about' %}" class="nav-link">About</a>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Dashboard <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        {% if user.role == 'student' %}
+                            <a href="{% url 'student_dashboard' %}">Student Dashboard</a>
+                        {% elif user.role == 'company' %}
+                            <a href="{% url 'company_dashboard' %}">Company Dashboard</a>
+                        {% elif user.role == 'university' %}
+                            <a href="{% url 'university_dashboard' %}">University Dashboard</a>
+                        {% elif user.role == 'admin' %}
+                            <a href="{% url 'admin_app:admin_dashboard' %}">Admin Dashboard</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if user.role == 'student' %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Applications <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'create_application' %}">Create Application</a>
+                        <a href="{% url 'application_status' %}">Application Status</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Reports <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'submit_weekly_report' %}">Submit Weekly Report</a>
+                        <a href="{% url 'report_history' %}">Report History</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="{% url 'messaging' %}" class="nav-link">Communication</a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="{% url 'leave_requests' %}" class="nav-link">Leave Management</a>
+                </div>
+                
+                {% elif user.role == 'company' %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Applications <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'manage_applications' %}">Manage Applications</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Teams <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'create_team' %}">Create Team</a>
+                        <a href="{% url 'team_management' %}">Team Management</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Projects <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'create_project' %}">Create Project</a>
+                        <a href="{% url 'project_management' %}">Project Management</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="{% url 'meetings' %}" class="nav-link">Meetings</a>
+                </div>
+                
+                {% elif user.role == 'university' %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Students <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'accepted_students' %}">Accepted Students</a>
+                        <a href="{% url 'assign_supervisor' %}">Assign Supervisor</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Performance <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'performance_overview' %}">Performance Overview</a>
+                        <a href="{% url 'attendance_calendar' %}">Attendance Calendar</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Evaluations <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'company_evaluations' %}">Company Evaluations</a>
+                        <a href="{% url 'final_evaluations' %}">Final Evaluations</a>
+                    </div>
+                </div>
+                
+                {% elif user.role == 'admin' %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Users <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'admin_app:user_management' %}">User Management</a>
+                        <a href="{% url 'admin_app:create_user' %}">Create User</a>
+                    </div>
+                </div>
+
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">System <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'admin_app:system_health_monitoring' %}">System Health</a>
+                        <a href="{% url 'admin_app:system_logs' %}">System Logs</a>
+                        <a href="{% url 'admin_app:user_activity_logs' %}">User Activity</a>
+                        <a href="{% url 'admin_app:security_audit' %}">Security Audit</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="{% url 'admin_app:analytics_dashboard' %}" class="nav-link">Analytics</a>
+                </div>
+                {% endif %}
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Settings <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        {% if user.role == 'student' %}
+                            <a href="{% url 'view_profile' %}">Profile</a>
+                            <a href="{% url 'internship_preferences' %}">Preferences</a>
+                            <a href="{% url 'notification_settings' %}">Notifications</a>
+                        {% elif user.role == 'company' %}
+                            <a href="{% url 'view_company_profile' %}">Company Profile</a>
+                            <a href="{% url 'notification_settings' %}">Notifications</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-user">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link user-profile">
+                        <i class="fas fa-user"></i> {{ user.username }} ({{ user.role }})
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="nav-menu">
+                <div class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link">Home</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'about' %}" class="nav-link">About</a>
+                </div>
+            </div>
+
+            <div class="nav-user">
+                <div class="nav-item">
+                    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="main-container">
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+                <button class="message-close" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2025 PRISM - Internship Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="{% url 'about' %}">About</a>
+                <a href="#">Help & Support</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Advanced PRISM JavaScript with Real-time Features
+        
+        // Initialize advanced features
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdvancedFeatures();
+            setupRealtimeFeatures();
+            initializeAnimations();
+            setupAdvancedInteractions();
+        });
+
+        // Advanced Features Initialization
+        function initializeAdvancedFeatures() {
+            // Initialize dropdown menus with enhanced functionality
+            setupAdvancedDropdowns();
+            
+            // Initialize dark mode toggle
+            setupDarkMode();
+            
+            // Initialize particle effects
+            setupParticleEffects();
+            
+            // Initialize notification system
+            setupNotificationSystem();
+            
+            // Initialize voice navigation
+            setupVoiceNavigation();
+            
+            // Initialize advanced scroll animations
+            setupAdvancedScrollAnimations();
+            
+            // Initialize advanced form enhancements
+            setupAdvancedForms();
+            
+            // Initialize advanced tooltips
+            setupAdvancedTooltips();
+        }
+
+        // Advanced Dropdown System
+        function setupAdvancedDropdowns() {
+            const dropdowns = document.querySelectorAll('.dropdown');
+            
+            dropdowns.forEach(dropdown => {
+                const link = dropdown.querySelector('.nav-link');
+                const content = dropdown.querySelector('.dropdown-content');
+                
+                // Enhanced click handler
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Close all other dropdowns
+                    dropdowns.forEach(otherDropdown => {
+                        if (otherDropdown !== dropdown) {
+                            otherDropdown.classList.remove('active');
+                            otherDropdown.querySelector('.dropdown-content').style.display = 'none';
+                        }
+                    });
+                    
+                    // Toggle current dropdown with animation
+                    dropdown.classList.toggle('active');
+                    content.style.display = dropdown.classList.contains('active') ? 'block' : 'none';
+                    
+                    // Add ripple effect
+                    createRippleEffect(e, link);
+                });
+            });
+            
+            // Enhanced outside click handler
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    dropdowns.forEach(dropdown => {
+                        dropdown.classList.remove('active');
+                        dropdown.querySelector('.dropdown-content').style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        // Dark Mode Implementation
+        function setupDarkMode() {
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            const body = document.body;
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                body.classList.add('dark-mode');
+            }
+            
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('click', function() {
+                    body.classList.toggle('dark-mode');
+                    localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+                    
+                    // Animate the toggle
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            }
+        }
+
+        // Particle Effects System
+        function setupParticleEffects() {
+            createParticleBackground();
+            
+            // Add interactive particles on hover
+            const interactiveElements = document.querySelectorAll('.interactive-card, .btn, .nav-link');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    createInteractiveParticles(e.clientX, e.clientY);
+                });
+            });
+        }
+
+        // Create Background Particles
+        function createParticleBackground() {
+            const container = document.createElement('div');
+            container.className = 'particle-background';
+            document.body.appendChild(container);
+            
+            // Create particles
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createParticle(container);
+                }, i * 200);
+            }
+        }
+
+        function createParticle(container) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            container.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 20000);
+        }
+
+        // Interactive Particles
+        function createInteractiveParticles(x, y) {
+            const container = document.querySelector('.particle-background');
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
+            
+            for (let i = 0; i < 5; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.position = 'fixed';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.width = '6px';
+                particle.style.height = '6px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '9999';
+                
+                document.body.appendChild(particle);
+                
+                // Animate particle
+                const angle = (Math.PI * 2 * i) / 5;
+                const velocity = 100;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                let posX = x;
+                let posY = y;
+                let opacity = 1;
+                
+                const animate = () => {
+                    posX += vx * 0.02;
+                    posY += vy * 0.02;
+                    opacity -= 0.02;
+                    
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.opacity = opacity;
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        document.body.removeChild(particle);
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            }
+        }
+
+        // Advanced Notification System
+        function setupNotificationSystem() {
+            const notificationPanel = document.createElement('div');
+            notificationPanel.className = 'notification-panel';
+            document.body.appendChild(notificationPanel);
+            
+            // Check for browser notification support
+            if ('Notification' in window && Notification.permission === 'granted') {
+                // Request notification permission on first interaction
+                document.addEventListener('click', function requestNotificationPermission() {
+                    if (Notification.permission !== 'granted') {
+                        Notification.requestPermission();
+                    }
+                    document.removeEventListener('click', requestNotificationPermission);
+                }, { once: true });
+            }
+        }
+
+        // Voice Navigation System
+        function setupVoiceNavigation() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                const voiceButton = document.querySelector('.voice-navigation');
+                if (voiceButton) {
+                    voiceButton.addEventListener('click', function() {
+                        recognition.start();
+                        this.classList.add('listening');
+                        
+                        recognition.onresult = function(event) {
+                            const command = event.results[0][0].transcript.toLowerCase();
+                            processVoiceCommand(command);
+                            this.classList.remove('listening');
+                        };
+                        
+                        recognition.onerror = function(event) {
+                            console.error('Speech recognition error:', event.error);
+                            voiceButton.classList.remove('listening');
+                        };
+                    });
+                }
+            }
+        }
+
+        function processVoiceCommand(command) {
+            // Simple voice command processing
+            if (command.includes('dashboard')) {
+                const dashboardLink = document.querySelector('a[href*="dashboard"]');
+                if (dashboardLink) dashboardLink.click();
+            } else if (command.includes('home')) {
+                const homeLink = document.querySelector('a[href*="home"]');
+                if (homeLink) homeLink.click();
+            } else if (command.includes('profile')) {
+                const profileLink = document.querySelector('a[href*="profile"]');
+                if (profileLink) profileLink.click();
+            }
+        }
+
+        // Advanced Scroll Animations
+        function setupAdvancedScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in-view');
+                        
+                        // Add staggered animation for child elements
+                        const children = entry.target.querySelectorAll('.animate-child');
+                        children.forEach((child, index) => {
+                            setTimeout(() => {
+                                child.classList.add('animate-in');
+                            }, index * 100);
+                        });
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe elements
+            document.querySelectorAll('.animate-on-scroll, .advanced-metric-card, .interactive-card').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Advanced Form Enhancements
+        function setupAdvancedForms() {
+            const inputs = document.querySelectorAll('.advanced-input input, .advanced-input select');
+            
+            inputs.forEach(input => {
+                // Add focus effects
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                    
+                    // Real-time validation
+                    if (this.checkValidity()) {
+                        this.parentElement.classList.add('valid');
+                    } else {
+                        this.parentElement.classList.remove('valid');
+                    }
+                });
+            });
+        }
+
+        // Advanced Tooltips
+        function setupAdvancedTooltips() {
+            const tooltipElements = document.querySelectorAll('[data-tooltip]');
+            
+            tooltipElements.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    showAdvancedTooltip(e, this.getAttribute('data-tooltip'));
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    hideAdvancedTooltip();
+                });
+            });
+        }
+
+        function showAdvancedTooltip(event, text) {
+            let tooltip = document.querySelector('.advanced-tooltip');
+            
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'advanced-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+            tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+        }
+
+        function hideAdvancedTooltip() {
+            const tooltip = document.querySelector('.advanced-tooltip');
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // Real-time Features Setup
+        function setupRealtimeFeatures() {
+            // Check if WebSocket is available for real-time updates
+            if (typeof WebSocket !== 'undefined') {
+                // Initialize real-time connection
+                initializeRealtimeConnection();
+            }
+            
+            // Setup real-time form validation
+            setupRealtimeValidation();
+            
+            // Setup real-time search
+            setupRealtimeSearch();
+        }
+
+        function initializeRealtimeConnection() {
+            // Example real-time connection setup
+            // This will be enhanced with actual WebSocket implementation
+            console.log('Real-time features initialized');
+            
+            // Simulate real-time updates
+            setInterval(() => {
+                updateRealtimeMetrics();
+            }, 30000); // Update every 30 seconds
+        }
+
+        function updateRealtimeMetrics() {
+            // Update dashboard metrics with real-time data
+            const metricElements = document.querySelectorAll('.realtime-metric');
+            metricElements.forEach(element => {
+                // Simulate data update
+                const currentValue = parseInt(element.textContent) || 0;
+                const newValue = currentValue + Math.floor(Math.random() * 5);
+                
+                // Animate the update
+                element.style.transform = 'scale(1.1)';
+                element.textContent = newValue;
+                
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+
+        function setupRealtimeValidation() {
+            const forms = document.querySelectorAll('form');
+            
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('input, select, textarea');
+                
+                inputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        // Real-time validation feedback
+                        if (this.checkValidity()) {
+                            this.classList.add('valid');
+                            this.classList.remove('invalid');
+                        } else {
+                            this.classList.add('invalid');
+                            this.classList.remove('valid');
+                        }
+                    });
+                });
+            });
+        }
+
+        function setupRealtimeSearch() {
+            const searchInputs = document.querySelectorAll('.realtime-search');
+            
+            searchInputs.forEach(input => {
+                let searchTimeout;
+                
+                input.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    
+                    searchTimeout = setTimeout(() => {
+                        performRealtimeSearch(this.value);
+                    }, 500);
+                });
+            });
+        }
+
+        function performRealtimeSearch(query) {
+            // Implement real-time search functionality
+            console.log('Searching for:', query);
+        }
+
+        // Advanced Interactions
+        function setupAdvancedInteractions() {
+            // Enhanced hover effects
+            setupEnhancedHoverEffects();
+            
+            // Advanced click effects
+            setupAdvancedClickEffects();
+            
+            // Keyboard shortcuts
+            setupKeyboardShortcuts();
+            
+            // Accessibility improvements
+            setupAccessibility();
+        }
+
+        function setupEnhancedHoverEffects() {
+            const interactiveElements = document.querySelectorAll('.interactive-card, .btn, .nav-item');
+            
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                });
+            });
+        }
+
+        function setupAdvancedClickEffects() {
+            const clickableElements = document.querySelectorAll('button, .btn, .nav-link, .clickable');
+            
+            clickableElements.forEach(element => {
+                element.addEventListener('click', function(e) {
+                    createRippleEffect(e, this);
+                });
+            });
+        }
+
+        function createRippleEffect(event, element) {
+            const ripple = document.createElement('span');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K for search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.querySelector('.search-input');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+                
+                // Ctrl/Cmd + D for dark mode
+                if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                    e.preventDefault();
+                    document.body.classList.toggle('dark-mode');
+                    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+                }
+                
+                // Escape to close modals/dropdowns
+                if (e.key === 'Escape') {
+                    const dropdowns = document.querySelectorAll('.dropdown.active');
+                    dropdowns.forEach(dropdown => {
+                        dropdown.classList.remove('active');
+                        dropdown.querySelector('.dropdown-content').style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        function setupAccessibility() {
+            // Skip to content link
+            const skipLink = document.createElement('a');
+            skipLink.href = '#main-content';
+            skipLink.textContent = 'Skip to content';
+            skipLink.className = 'skip-link';
+            document.body.insertBefore(skipLink, document.body.firstChild);
+            
+            // Enhanced keyboard navigation
+            const focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            
+            focusableElements.forEach(element => {
+                element.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+        }
+
+        // Animation initialization
+        function initializeAnimations() {
+            // Initialize CSS animations
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
+                element.style.opacity = '0';
+            });
+            
+            // Animate elements on page load
+            setTimeout(() => {
+                document.querySelectorAll('.animate-fade-in').forEach((element, index) => {
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }, 100);
+        }
+
+        // Utility functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // Global error handling
+        window.addEventListener('error', function(e) {
+            console.error('PRISM Error:', e.error);
+            // Optionally send error to monitoring service
+        });
+
+        // Performance monitoring
+        if ('PerformanceObserver' in window) {
+            const perfObserver = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    console.log('Performance metric:', entry.name, entry.duration);
+                }
+            });
+            perfObserver.observe({ entryTypes: ['measure', 'navigation', 'resource'] });
+        }
+    </script>
+</body>
+</html>

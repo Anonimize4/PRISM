@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-building"></i> Company Dashboard</h1>
+    <p>Welcome back, {{ user.username }}!</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Applications Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Applications</h3>
+            <div class="card-icon primary">
+                <i class="fas fa-file-alt"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ total_applications }}</div>
+        <p class="card-description">Total Applications</p>
+        <div style="margin-top: 1rem;">
+            <div class="status-badge pending">{{ pending_applications }} Pending</div>
+            <div class="status-badge accepted">{{ accepted_applications }} Accepted</div>
+        </div>
+        <a href="{% url 'manage_applications' %}" class="btn btn-primary btn-block mt-3">
+            <i class="fas fa-tasks"></i> Manage Applications
+        </a>
+    </div>
+
+    <!-- Teams Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Teams</h3>
+            <div class="card-icon success">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ teams|length }}</div>
+        <p class="card-description">Active Teams</p>
+        <a href="{% url 'create_team' %}" class="btn btn-success btn-block mt-3">
+            <i class="fas fa-plus"></i> Create Team
+        </a>
+        <a href="{% url 'team_management' %}" class="btn btn-secondary btn-block mt-2">
+            <i class="fas fa-list"></i> View Teams
+        </a>
+    </div>
+
+    <!-- Leave Requests Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Leave Requests</h3>
+            <div class="card-icon warning">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ pending_leave_requests|length }}</div>
+        <p class="card-description">Pending Requests</p>
+        <a href="{% url 'leave_requests' %}" class="btn btn-warning btn-block mt-3">
+            <i class="fas fa-clock"></i> Review Requests
+        </a>
+    </div>
+
+    <!-- Meetings Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Meetings</h3>
+            <div class="card-icon info">
+                <i class="fas fa-video"></i>
+            </div>
+        </div>
+        <div class="card-value">{{ upcoming_meetings|length }}</div>
+        <p class="card-description">Upcoming Meetings</p>
+        <a href="{% url 'schedule_meeting' %}" class="btn btn-info btn-block mt-3">
+            <i class="fas fa-calendar-plus"></i> Schedule Meeting
+        </a>
+        <a href="{% url 'meetings' %}" class="btn btn-secondary btn-block mt-2">
+            <i class="fas fa-calendar"></i> View All
+        </a>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Recent Applications</h3>
+        <a href="{% url 'manage_applications' %}" class="btn btn-primary btn-sm">View All</a>
+    </div>
+    <div class="table-container">
+        {% if applications %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th>Applied Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.student.username }}</td>
+                    <td><span class="status-badge {{ app.status }}">{{ app.status }}</span></td>
+                    <td>{{ app.applied_date|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-secondary">View</a>
+                        {% if app.status == 'pending' %}
+                        <form method="post" action="{% url 'update_application_status' app.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="accepted">
+                            <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                        </form>
+                        <form method="post" action="{% url 'update_application_status' app.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="rejected">
+                            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center p-4">
+            <p class="text-secondary">No applications found yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="dashboard-grid">
+        <a href="{% url 'create_project' %}" class="card text-decoration-none">
+            <div class="card-icon primary">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <h4>Create Project</h4>
+            <p class="text-secondary">Assign projects to teams</p>
+        </a>
+        
+        <a href="{% url 'review_reports' %}" class="card text-decoration-none">
+            <div class="card-icon warning">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h4>Review Reports</h4>
+            <p class="text-secondary">Evaluate student submissions</p>
+        </a>
+        
+        <a href="{% url 'student_evaluations' %}" class="card text-decoration-none">
+            <div class="card-icon success">
+                <i class="fas fa-star"></i>
+            </div>
+            <h4>Evaluations</h4>
+            <p class="text-secondary">View student performance</p>
+        </a>
+        
+        <a href="{% url 'messaging' %}" class="card text-decoration-none">
+            <div class="card-icon info">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h4>Messages</h4>
+            <p class="text-secondary">Communicate with students</p>
+        </a>
+    </div>
+</div>
+
+<!-- Company Profile Summary -->
+{% if profile %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Company Profile</h3>
+        <a href="{% url 'view_company_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
+    </div>
+    <div class="card-body">
+        <div class="dashboard-grid">
+            <div>
+                <h4>{{ profile.company_name }}</h4>
+                <p class="text-secondary">{{ profile.industry }}</p>
+                <p>{{ profile.description|truncatewords:20 }}</p>
+            </div>
+            <div>
+                <h5>Contact Information</h5>
+                <p><strong>Contact Person:</strong> {{ profile.contact_person }}</p>
+                <p><strong>Email:</strong> {{ profile.contact_email }}</p>
+                <p><strong>Phone:</strong> {{ profile.contact_phone }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

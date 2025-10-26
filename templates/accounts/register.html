@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - PRISM{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card animate-fade-in">
+        <div class="auth-header">
+            <h1 class="animate-bounce-in">
+                <i class="fas fa-user-plus"></i> Join PRISM
+            </h1>
+            <p>Create your account and start your journey</p>
+        </div>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <div class="form-group animate-fade-in-delay">
+                <label for="username">Username</label>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" id="username" placeholder="Choose a username" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" id="email" placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="first_name">First Name</label>
+                <div class="input-group">
+                    <i class="fas fa-id-card"></i>
+                    <input type="text" name="first_name" id="first_name" placeholder="Enter your first name" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="last_name">Last Name</label>
+                <div class="input-group">
+                    <i class="fas fa-id-card"></i>
+                    <input type="text" name="last_name" id="last_name" placeholder="Enter your last name" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="password1">Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password1" id="password1" placeholder="Create a password" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="password2">Confirm Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password2" id="password2" placeholder="Confirm your password" required>
+                </div>
+            </div>
+
+            <div class="form-group animate-fade-in-delay">
+                <label for="role">User Role</label>
+                <div class="input-group">
+                    <i class="fas fa-user-tag"></i>
+                    <select name="role" id="role" required>
+                        <option value="">Select your role</option>
+                        <option value="student">🎓 Student</option>
+                        <option value="company">🏢 Company</option>
+                        <option value="university">🎓 University</option>
+                        <option value="admin">⚙️ Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block animate-fade-in-delay-2">
+                <i class="fas fa-rocket"></i> Create Account
+            </button>
+        </form>
+
+        <div class="auth-footer animate-fade-in-delay-2">
+            <p>Already have an account? <a href="{% url 'login' %}" class="text-primary">Sign in here</a></p>
+        </div>
+
+        <!-- Decorative elements -->
+        <div class="auth-decoration">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.decoration-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05));
+    animation: float 6s ease-in-out infinite;
+}
+
+.circle-1 {
+    width: 100px;
+    height: 100px;
+    top: -50px;
+    right: -50px;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 80px;
+    height: 80px;
+    bottom: -40px;
+    left: -40px;
+    animation-delay: 2s;
+}
+
+.circle-3 {
+    width: 60px;
+    height: 60px;
+    top: 50%;
+    left: -30px;
+    animation-delay: 4s;
+}
+
+.animate-bounce-in {
+    animation: bounceIn 1s ease-out;
+}
+
+.auth-card {
+    position: relative;
+    overflow: hidden;
+    max-width: 500px;
+}
+
+.auth-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.auth-form {
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+select option {
+    padding: 0.5rem;
+}
+</style>
+{% endblock %}

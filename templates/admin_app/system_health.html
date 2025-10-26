@@ -1,0 +1,663 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Health - PRISM{% endblock %}
+
+{% block content %}
+<div class="system-health">
+    <div class="page-header">
+        <h1><i class="fas fa-heartbeat"></i> System Health Monitoring</h1>
+        <p>Real-time system performance and health metrics</p>
+    </div>
+
+    <!-- Current System Status -->
+    {% if latest_metrics %}
+    <div class="status-overview">
+        <h2>Current System Status</h2>
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon cpu">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.cpu_usage }}%</div>
+                    <div class="status-label">CPU Usage</div>
+                    <div class="status-indicator {{ latest_metrics.cpu_usage|floatformat:0|add:'0'|int|status_class }}">
+                        {{ latest_metrics.cpu_usage|floatformat:0|add:'0'|int|status_text }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon memory">
+                    <i class="fas fa-memory"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.memory_usage }}%</div>
+                    <div class="status-label">Memory Usage</div>
+                    <div class="status-indicator {{ latest_metrics.memory_usage|floatformat:0|add:'0'|int|status_class }}">
+                        {{ latest_metrics.memory_usage|floatformat:0|add:'0'|int|status_text }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon disk">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.disk_usage }}%</div>
+                    <div class="status-label">Disk Usage</div>
+                    <div class="status-indicator {{ latest_metrics.disk_usage|floatformat:0|add:'0'|int|status_class }}">
+                        {{ latest_metrics.disk_usage|floatformat:0|add:'0'|int|status_text }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.active_users }}</div>
+                    <div class="status-label">Active Users</div>
+                    <div class="status-indicator good">Normal</div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon database">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.database_connections }}</div>
+                    <div class="status-label">DB Connections</div>
+                    <div class="status-indicator good">Healthy</div>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-icon response">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-value">{{ latest_metrics.server_response_time }}ms</div>
+                    <div class="status-label">Response Time</div>
+                    <div class="status-indicator {{ latest_metrics.server_response_time|floatformat:0|add:'0'|int|response_class }}">
+                        {{ latest_metrics.server_response_time|floatformat:0|add:'0'|int|response_text }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Health Records Table -->
+    <div class="health-records">
+        <h2>Recent Health Records</h2>
+        {% if health_records %}
+            <div class="records-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>CPU Usage</th>
+                            <th>Memory Usage</th>
+                            <th>Disk Usage</th>
+                            <th>Active Users</th>
+                            <th>DB Connections</th>
+                            <th>Response Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in health_records %}
+                        <tr>
+                            <td>{{ record.timestamp|date:"M d, Y H:i:s" }}</td>
+                            <td>
+                                <span class="usage-value {{ record.cpu_usage|floatformat:0|add:'0'|int|usage_class }}">
+                                    {{ record.cpu_usage }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="usage-value {{ record.memory_usage|floatformat:0|add:'0'|int|usage_class }}">
+                                    {{ record.memory_usage }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="usage-value {{ record.disk_usage|floatformat:0|add:'0'|int|usage_class }}">
+                                    {{ record.disk_usage }}%
+                                </span>
+                            </td>
+                            <td>{{ record.active_users }}</td>
+                            <td>{{ record.database_connections }}</td>
+                            <td>
+                                <span class="response-value {{ record.server_response_time|floatformat:0|add:'0'|int|response_class }}">
+                                    {{ record.server_response_time }}ms
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge {{ record|overall_status }}">
+                                    {{ record|overall_status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3>No Health Records</h3>
+                <p>System health monitoring data will be displayed once records are available.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- System Alerts -->
+    <div class="system-alerts">
+        <h2>System Alerts & Recommendations</h2>
+        <div class="alerts-grid">
+            <div class="alert-card warning">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <h3>High CPU Usage Detected</h3>
+                    <p>CPU usage has exceeded 80% in the last hour. Consider optimizing system processes.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-warning">View Details</button>
+                        <button class="btn btn-sm btn-secondary">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-card info">
+                <div class="alert-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <h3>Database Optimization</h3>
+                    <p>Consider running database maintenance tasks to improve performance.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-info">Optimize Now</button>
+                        <button class="btn btn-sm btn-secondary">Schedule</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-card success">
+                <div class="alert-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <h3>System Health Good</h3>
+                    <p>All system metrics are within normal ranges. System is performing optimally.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-success">View Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Configuration -->
+    <div class="system-config">
+        <h2>System Configuration</h2>
+        <div class="config-options">
+            <button class="btn btn-primary" onclick="runHealthCheck()">
+                <i class="fas fa-stethoscope"></i> Run Health Check
+            </button>
+            <button class="btn btn-info" onclick="generateReport()">
+                <i class="fas fa-file-alt"></i> Generate Report
+            </button>
+            <button class="btn btn-warning" onclick="configureAlerts()">
+                <i class="fas fa-bell"></i> Configure Alerts
+            </button>
+            <button class="btn btn-success" onclick="optimizeSystem()">
+                <i class="fas fa-wrench"></i> Optimize System
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Custom template filters for status classes
+// These would normally be defined in a Django template filter
+function getStatusClass(value) {
+    if (value < 50) return 'good';
+    if (value < 80) return 'warning';
+    return 'critical';
+}
+
+function getStatusText(value) {
+    if (value < 50) return 'Good';
+    if (value < 80) return 'Warning';
+    return 'Critical';
+}
+
+function getResponseClass(value) {
+    if (value < 200) return 'good';
+    if (value < 500) return 'warning';
+    return 'critical';
+}
+
+function getResponseText(value) {
+    if (value < 200) return 'Fast';
+    if (value < 500) return 'Normal';
+    return 'Slow';
+}
+
+function getUsageClass(value) {
+    if (value < 70) return 'good';
+    if (value < 90) return 'warning';
+    return 'critical';
+}
+
+function runHealthCheck() {
+    alert('Running comprehensive system health check...');
+    // In a real implementation, this would trigger a health check
+}
+
+function generateReport() {
+    alert('Generating system health report...');
+    // In a real implementation, this would generate and download a report
+}
+
+function configureAlerts() {
+    alert('Opening alert configuration...');
+    // In a real implementation, this would open an alert configuration modal
+}
+
+function optimizeSystem() {
+    if (confirm('Are you sure you want to run system optimization? This may temporarily affect performance.')) {
+        alert('Running system optimization...');
+        // In a real implementation, this would trigger optimization processes
+    }
+}
+</script>
+
+<style>
+.system-health {
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.status-overview {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.status-overview h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.status-card {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.status-icon.cpu { background: var(--primary-color); }
+.status-icon.memory { background: var(--success-color); }
+.status-icon.disk { background: var(--warning-color); }
+.status-icon.users { background: var(--info-color); }
+.status-icon.database { background: #6b46c1; }
+.status-icon.response { background: #ec4899; }
+
+.status-info {
+    flex: 1;
+}
+
+.status-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.status-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.status-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-indicator.good {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-indicator.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-indicator.critical {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.health-records {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.health-records h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.records-table {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.usage-value,
+.response-value {
+    font-weight: 600;
+}
+
+.usage-value.good,
+.response-value.good {
+    color: var(--success-color);
+}
+
+.usage-value.warning,
+.response-value.warning {
+    color: var(--warning-color);
+}
+
+.usage-value.critical,
+.response-value.critical {
+    color: var(--danger-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.good {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-badge.critical {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.system-alerts {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.system-alerts h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.alerts-grid {
+    display: grid;
+    gap: 2rem;
+}
+
+.alert-card {
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    border-left: 4px solid;
+}
+
+.alert-card.warning {
+    background: rgba(245, 158, 11, 0.05);
+    border-left-color: var(--warning-color);
+}
+
+.alert-card.info {
+    background: rgba(59, 130, 246, 0.05);
+    border-left-color: var(--info-color);
+}
+
+.alert-card.success {
+    background: rgba(16, 185, 129, 0.05);
+    border-left-color: var(--success-color);
+}
+
+.alert-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.alert-card.warning .alert-icon { background: var(--warning-color); color: white; }
+.alert-card.info .alert-icon { background: var(--info-color); color: white; }
+.alert-card.success .alert-icon { background: var(--success-color); color: white; }
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-content h3 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.alert-content p {
+    color: var(--secondary-color);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.system-config {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.system-config h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.config-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .system-health {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .status-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .records-table {
+        overflow-x: auto;
+    }
+
+    .alert-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .alert-actions {
+        justify-content: center;
+    }
+
+    .config-options {
+        flex-direction: column;
+    }
+
+    .config-options .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

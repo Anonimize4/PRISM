@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - PRISM{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <p class="profile-role">Student</p>
+                <p class="profile-id">ID: {{ profile.student_id }}</p>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+            <a href="{% url 'edit_academic_info' %}" class="btn btn-secondary">
+                <i class="fas fa-graduation-cap"></i> Edit Academic Info
+            </a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <!-- Personal Information -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user"></i> Personal Information</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Phone Number</label>
+                    <p>{{ profile.phone_number }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Date of Birth</label>
+                    <p>{{ profile.date_of_birth|date:"M d, Y" }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Address</label>
+                    <p>{{ profile.address }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-phone"></i> Emergency Contact</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Name</label>
+                    <p>{{ profile.emergency_contact_name }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Phone</label>
+                    <p>{{ profile.emergency_contact_phone }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Relationship</label>
+                    <p>{{ profile.emergency_contact_relationship }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if academic_info %}
+        <!-- Academic Information -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-graduation-cap"></i> Academic Information</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>University</label>
+                    <p>{{ academic_info.university }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Major</label>
+                    <p>{{ academic_info.major }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Year of Study</label>
+                    <p>{{ academic_info.get_year_of_study_display }}</p>
+                </div>
+                <div class="info-item">
+                    <label>GPA</label>
+                    <p>{{ academic_info.gpa }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Expected Graduation</label>
+                    <p>{{ academic_info.expected_graduation|date:"M d, Y" }}</p>
+                </div>
+            </div>
+
+            <div class="info-full">
+                <div class="info-item">
+                    <label>Skills</label>
+                    <p>{{ academic_info.skills }}</p>
+                </div>
+                {% if academic_info.certifications %}
+                <div class="info-item">
+                    <label>Certifications</label>
+                    <p>{{ academic_info.certifications }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-graduation-cap"></i> Academic Information</h2>
+            </div>
+            <div class="empty-state">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>No Academic Information</h3>
+                <p>You haven't added your academic information yet.</p>
+                <a href="{% url 'create_academic_info' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Academic Info
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.profile-header {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.profile-info h1 {
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.profile-role {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.profile-id {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.profile-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.profile-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+    color: var(--dark-color);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.info-full {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item p {
+    color: var(--secondary-color);
+    line-height: 1.5;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--secondary-color);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .profile-actions .btn {
+        width: 100%;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

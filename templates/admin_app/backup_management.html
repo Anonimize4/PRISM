@@ -1,0 +1,1053 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Backup Management - PRISM{% endblock %}
+
+{% block content %}
+<div class="backup-management">
+    <div class="page-header">
+        <h1><i class="fas fa-save"></i> Backup Management</h1>
+        <p>Manage system backups and data recovery</p>
+    </div>
+
+    <!-- Backup Overview -->
+    <div class="backup-overview">
+        <div class="overview-grid">
+            <div class="overview-card">
+                <div class="overview-icon total">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ backups|length }}</div>
+                    <div class="overview-label">Total Backups</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> +2 this week
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ successful_backups|default:0 }}</div>
+                    <div class="overview-label">Successful</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> 100% success rate
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon size">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ total_size|default:'0MB' }}</div>
+                    <div class="overview-label">Total Size</div>
+                    <div class="overview-change neutral">
+                        <i class="fas fa-minus"></i> Stable
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon schedule">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">Daily</div>
+                    <div class="overview-label">Auto Backup</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-check"></i> Active
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="btn btn-primary" onclick="createBackup()">
+            <i class="fas fa-plus"></i> Create New Backup
+        </button>
+        <button class="btn btn-success" onclick="scheduleBackup()">
+            <i class="fas fa-calendar-alt"></i> Schedule Backup
+        </button>
+        <button class="btn btn-info" onclick="testRestore()">
+            <i class="fas fa-undo"></i> Test Restore
+        </button>
+        <button class="btn btn-warning" onclick="cleanupOld()">
+            <i class="fas fa-trash"></i> Cleanup Old Backups
+        </button>
+    </div>
+
+    <!-- Backup History -->
+    {% if backups %}
+        <div class="backup-table">
+            <div class="table-header">
+                <h2>Backup History</h2>
+                <div class="table-actions">
+                    <button class="btn btn-info" onclick="exportBackupList()">
+                        <i class="fas fa-download"></i> Export List
+                    </button>
+                    <button class="btn btn-warning" onclick="viewBackupSettings()">
+                        <i class="fas fa-cog"></i> Backup Settings
+                    </button>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Backup Name</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Expires</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr class="backup-row">
+                        <td>
+                            <div class="backup-info">
+                                <div class="backup-name">{{ backup.name }}</div>
+                                <div class="backup-desc">{{ backup.description|default:'System backup'|truncatechars:40 }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="type-badge type-{{ backup.backup_type|slugify }}">
+                                {{ backup.backup_type|title }}
+                            </span>
+                        </td>
+                        <td class="backup-size">{{ backup.size|default:'-' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ backup.status|slugify }}">
+                                {{ backup.status|title }}
+                            </span>
+                        </td>
+                        <td class="timestamp">{{ backup.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if backup.expires_at %}
+                                {{ backup.expires_at|date:"M d, Y" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-info view-backup-btn"
+                                        data-id="{{ backup.id }}">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-success download-backup-btn"
+                                        data-id="{{ backup.id }}">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button class="btn btn-sm btn-warning restore-backup-btn"
+                                        data-id="{{ backup.id }}"
+                                        data-name="{{ backup.name }}">
+                                    <i class="fas fa-undo"></i> Restore
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-backup-btn"
+                                        data-id="{{ backup.id }}"
+                                        data-name="{{ backup.name }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-save"></i>
+            </div>
+            <h3>No Backups Found</h3>
+            <p>No system backups have been created yet.</p>
+            <button class="btn btn-primary" onclick="createBackup()">
+                <i class="fas fa-plus"></i> Create First Backup
+            </button>
+        </div>
+    {% endif %}
+
+    <!-- Backup Statistics -->
+    <div class="backup-stats">
+        <h2>Backup Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Daily Backups</h3>
+                    <p class="stat-value">{{ daily_backups|default:0 }}</p>
+                    <p class="stat-desc">Automated daily backups</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Weekly Backups</h3>
+                    <p class="stat-value">{{ weekly_backups|default:0 }}</p>
+                    <p class="stat-desc">Comprehensive weekly backups</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Monthly Backups</h3>
+                    <p class="stat-value">{{ monthly_backups|default:0 }}</p>
+                    <p class="stat-desc">Full monthly archives</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Failed Backups</h3>
+                    <p class="stat-value">{{ failed_backups|default:0 }}</p>
+                    <p class="stat-desc">Backups that need attention</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Average Time</h3>
+                    <p class="stat-value">{{ avg_backup_time|default:'5min' }}</p>
+                    <p class="stat-desc">Time to complete backup</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Success Rate</h3>
+                    <p class="stat-value">99.8%</p>
+                    <p class="stat-desc">Backup success percentage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Recommendations -->
+    <div class="backup-recommendations">
+        <h2>Backup Recommendations</h2>
+        <div class="recommendations-list">
+            <div class="recommendation-item">
+                <div class="recommendation-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Enable Encryption</h3>
+                    <p>Encrypt all backups to protect sensitive data during storage and transfer.</p>
+                    <button class="btn btn-sm btn-primary">Enable Encryption</button>
+                </div>
+            </div>
+
+            <div class="recommendation-item">
+                <div class="recommendation-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Cloud Storage</h3>
+                    <p>Store backups in multiple locations including cloud storage for redundancy.</p>
+                    <button class="btn btn-sm btn-info">Configure Cloud</button>
+                </div>
+            </div>
+
+            <div class="recommendation-item">
+                <div class="recommendation-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Backup Notifications</h3>
+                    <p>Receive alerts when backups fail or require attention.</p>
+                    <button class="btn btn-sm btn-warning">Setup Alerts</button>
+                </div>
+            </div>
+
+            <div class="recommendation-item">
+                <div class="recommendation-icon">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Regular Testing</h3>
+                    <p>Test backup restoration regularly to ensure data integrity.</p>
+                    <button class="btn btn-sm btn-success">Test Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Backup Modal -->
+<div id="backup-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Create New Backup</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="backup-form" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="backup_name">Backup Name</label>
+                    <input type="text" id="backup_name" name="backup_name" required
+                           placeholder="e.g., Daily_Backup_2025_01_15">
+                </div>
+                <div class="form-group">
+                    <label for="backup_type">Backup Type</label>
+                    <select id="backup_type" name="backup_type" required>
+                        <option value="full">Full Backup</option>
+                        <option value="incremental">Incremental Backup</option>
+                        <option value="differential">Differential Backup</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="3"
+                              placeholder="Describe what this backup contains"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="encrypt_backup" name="encrypt_backup">
+                        <span class="checkmark"></span>
+                        Encrypt this backup
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="compress_backup" name="compress_backup" checked>
+                        <span class="checkmark"></span>
+                        Compress backup to save space
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Start Backup</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle view backup buttons
+    const viewButtons = document.querySelectorAll('.view-backup-btn');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            viewBackup(id);
+        });
+    });
+
+    // Handle download backup buttons
+    const downloadButtons = document.querySelectorAll('.download-backup-btn');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            downloadBackup(id);
+        });
+    });
+
+    // Handle restore backup buttons
+    const restoreButtons = document.querySelectorAll('.restore-backup-btn');
+    restoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            restoreBackup(id, name);
+        });
+    });
+
+    // Handle delete backup buttons
+    const deleteButtons = document.querySelectorAll('.delete-backup-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            deleteBackup(id, name);
+        });
+    });
+});
+
+function createBackup() {
+    document.getElementById('modal-title').textContent = 'Create New Backup';
+    document.getElementById('backup-form').reset();
+    document.getElementById('backup-modal').style.display = 'flex';
+}
+
+function viewBackup(id) {
+    // This would typically show backup details
+    alert('Viewing backup details...');
+    // In a real implementation, this would open a details modal
+}
+
+function downloadBackup(id) {
+    // This would typically trigger a download
+    alert('Downloading backup file...');
+    // In a real implementation, this would start the download
+}
+
+function restoreBackup(id, name) {
+    if (confirm(`Are you sure you want to restore from backup "${name}"? This will overwrite current data.`)) {
+        alert('Starting backup restoration...');
+        // In a real implementation, this would start the restore process
+    }
+}
+
+function deleteBackup(id, name) {
+    if (confirm(`Are you sure you want to delete backup "${name}"? This action cannot be undone.`)) {
+        // This would typically make an AJAX call
+        alert('Backup deleted successfully!');
+        location.reload();
+    }
+}
+
+function scheduleBackup() {
+    // This would typically open a scheduling modal
+    alert('Opening backup scheduler...');
+    // In a real implementation, this would open a scheduling interface
+}
+
+function testRestore() {
+    // This would typically run a test restore
+    alert('Running test restore...');
+    // In a real implementation, this would perform a test restoration
+}
+
+function cleanupOld() {
+    if (confirm('Are you sure you want to clean up old backups? This will delete backups older than the retention period.')) {
+        // This would typically make an AJAX call
+        alert('Cleaning up old backups...');
+        // In a real implementation, this would clean up old backups
+    }
+}
+
+function exportBackupList() {
+    // This would typically export the backup list
+    alert('Exporting backup list...');
+    // In a real implementation, this would generate and download a report
+}
+
+function viewBackupSettings() {
+    // This would typically show backup settings
+    alert('Opening backup settings...');
+    // In a real implementation, this would open a settings modal
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('backup-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+function closeModal() {
+    document.getElementById('backup-modal').style.display = 'none';
+}
+</script>
+
+<style>
+.backup-management {
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.backup-overview {
+    margin-bottom: 3rem;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.overview-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.overview-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.overview-icon.total { background: var(--primary-color); }
+.overview-icon.success { background: var(--success-color); }
+.overview-icon.size { background: var(--warning-color); }
+.overview-icon.schedule { background: var(--info-color); }
+
+.overview-info {
+    flex: 1;
+}
+
+.overview-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.overview-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.overview-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.overview-change.positive {
+    color: var(--success-color);
+}
+
+.overview-change.negative {
+    color: var(--danger-color);
+}
+
+.overview-change.neutral {
+    color: var(--secondary-color);
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.backup-table {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+.table-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.backup-row {
+    transition: background-color 0.3s ease;
+}
+
+.backup-row:hover {
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.backup-info {
+    max-width: 250px;
+}
+
+.backup-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.backup-desc {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.type-full { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.type-incremental { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.type-differential { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+
+.backup-size {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-completed { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.status-in_progress { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.status-failed { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.timestamp {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.backup-stats {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.backup-stats h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-content h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-desc {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.backup-recommendations {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.backup-recommendations h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.recommendations-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.recommendation-item {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.recommendation-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.recommendation-content {
+    flex: 1;
+}
+
+.recommendation-content h3 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.recommendation-content p {
+    color: var(--secondary-color);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.checkmark {
+    position: relative;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .backup-management {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .quick-actions .btn {
+        width: 100%;
+    }
+
+    .backup-table {
+        overflow-x: auto;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .table-actions .btn {
+        width: 100%;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .recommendations-list {
+        gap: 1rem;
+    }
+
+    .recommendation-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

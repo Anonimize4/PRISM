@@ -1,0 +1,763 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Audit - PRISM{% endblock %}
+
+{% block content %}
+<div class="security-audit">
+    <div class="page-header">
+        <h1><i class="fas fa-shield-alt"></i> Security Audit</h1>
+        <p>Monitor and track security events across the system</p>
+    </div>
+
+    <!-- Security Overview -->
+    <div class="security-overview">
+        <div class="overview-grid">
+            <div class="overview-card">
+                <div class="overview-icon security">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ total_audits|default:0 }}</div>
+                    <div class="overview-label">Total Audits</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> +5% this week
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon alerts">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ critical_alerts|default:0 }}</div>
+                    <div class="overview-label">Critical Alerts</div>
+                    <div class="overview-change negative">
+                        <i class="fas fa-arrow-down"></i> -2 this week
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon blocked">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ blocked_attempts|default:0 }}</div>
+                    <div class="overview-label">Blocked Attempts</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> +15 this week
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon score">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">98%</div>
+                    <div class="overview-label">Security Score</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> +2% this month
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="audit_type">Audit Type</label>
+                    <select id="audit_type" name="audit_type">
+                        <option value="">All Types</option>
+                        <option value="login" {% if audit_type == 'login' %}selected{% endif %}>Login Attempts</option>
+                        <option value="failed_login" {% if audit_type == 'failed_login' %}selected{% endif %}>Failed Logins</option>
+                        <option value="suspicious_activity" {% if audit_type == 'suspicious_activity' %}selected{% endif %}>Suspicious Activity</option>
+                        <option value="password_change" {% if audit_type == 'password_change' %}selected{% endif %}>Password Changes</option>
+                        <option value="admin_action" {% if audit_type == 'admin_action' %}selected{% endif %}>Admin Actions</option>
+                        <option value="data_access" {% if audit_type == 'data_access' %}selected{% endif %}>Data Access</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="user">User</label>
+                    <input type="text" id="user" name="user" placeholder="Search by username"
+                           value="{{ user_filter }}">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'admin_app:security_audit' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Audit Logs Table -->
+    {% if page_obj %}
+        <div class="audit-table">
+            <div class="table-header">
+                <h2>Security Audit Logs</h2>
+                <div class="table-actions">
+                    <button class="btn btn-info" onclick="exportAudits()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    <button class="btn btn-warning" onclick="generateSecurityReport()">
+                        <i class="fas fa-file-alt"></i> Security Report
+                    </button>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Audit Type</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Risk Level</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for audit in page_obj %}
+                    <tr class="audit-row audit-{{ audit.audit_type|slugify }}">
+                        <td class="timestamp">{{ audit.timestamp|date:"M d, Y H:i:s" }}</td>
+                        <td>
+                            {% if audit.user %}
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="user-name">{{ audit.user.username }}</div>
+                                        <div class="user-email">{{ audit.user.email }}</div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="system-user">System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="audit-badge audit-{{ audit.audit_type|slugify }}">
+                                {{ audit.audit_type|title|truncatechars:15 }}
+                            </span>
+                        </td>
+                        <td class="description">{{ audit.description|truncatechars:60 }}</td>
+                        <td>{{ audit.ip_address|default:"-" }}</td>
+                        <td>
+                            <span class="risk-badge risk-{{ audit.risk_level|default:'low' }}">
+                                {{ audit.risk_level|default:'low'|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ audit.status|default:'normal' }}">
+                                {{ audit.status|default:'normal'|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            <div class="pagination-info">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} audit records
+            </div>
+            <div class="pagination-controls">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if audit_type %}&audit_type={{ audit_type }}{% endif %}{% if user_filter %}&user={{ user_filter }}{% endif %}"
+                       class="btn btn-secondary">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+
+                <span class="page-info">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if audit_type %}&audit_type={{ audit_type }}{% endif %}{% if user_filter %}&user={{ user_filter }}{% endif %}"
+                       class="btn btn-secondary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3>No Security Audit Records</h3>
+            <p>No security audit records match your current filters.</p>
+            <a href="{% url 'admin_app:security_audit' %}" class="btn btn-primary">
+                <i class="fas fa-times"></i> Clear Filters
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Security Recommendations -->
+    <div class="security-recommendations">
+        <h2>Security Recommendations</h2>
+        <div class="recommendations-grid">
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Enable Two-Factor Authentication</h3>
+                    <p>Add an extra layer of security by requiring 2FA for all admin accounts.</p>
+                    <button class="btn btn-sm btn-primary">Configure 2FA</button>
+                </div>
+            </div>
+
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Regular Password Updates</h3>
+                    <p>Implement automatic password expiration and complexity requirements.</p>
+                    <button class="btn btn-sm btn-warning">Update Policy</button>
+                </div>
+            </div>
+
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Monitor Suspicious Activity</h3>
+                    <p>Set up alerts for unusual login patterns and failed authentication attempts.</p>
+                    <button class="btn btn-sm btn-info">Configure Alerts</button>
+                </div>
+            </div>
+
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h3>Data Encryption</h3>
+                    <p>Ensure all sensitive data is encrypted both at rest and in transit.</p>
+                    <button class="btn btn-sm btn-success">Review Encryption</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportAudits() {
+    // This would typically make an AJAX call to export audit data
+    alert('Exporting security audit data...');
+    // In a real implementation, this would trigger a download
+}
+
+function generateSecurityReport() {
+    // This would typically make an AJAX call to generate a security report
+    alert('Generating security report...');
+    // In a real implementation, this would generate and download a report
+}
+
+// Auto-refresh security data every 60 seconds
+setInterval(function() {
+    // In a real implementation, this would refresh security metrics
+    console.log('Refreshing security data...');
+}, 60000);
+</script>
+
+<style>
+.security-audit {
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.security-overview {
+    margin-bottom: 3rem;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.overview-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.overview-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.overview-icon.security { background: var(--success-color); }
+.overview-icon.alerts { background: var(--warning-color); }
+.overview-icon.blocked { background: var(--danger-color); }
+.overview-icon.score { background: var(--primary-color); }
+
+.overview-info {
+    flex: 1;
+}
+
+.overview-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.overview-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.overview-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.overview-change.positive {
+    color: var(--success-color);
+}
+
+.overview-change.negative {
+    color: var(--danger-color);
+}
+
+.filters-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.filters-form {
+    width: 100%;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.audit-table {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.table-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.audit-row {
+    transition: background-color 0.3s ease;
+}
+
+.audit-row:hover {
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.user-email {
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+}
+
+.system-user {
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+.audit-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.audit-login { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.audit-failed_login { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+.audit-suspicious_activity { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.audit-password_change { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.audit-admin_action { background: rgba(147, 51, 234, 0.1); color: #9333EA; }
+.audit-data_access { background: rgba(139, 69, 19, 0.1); color: #8B4513; }
+
+.risk-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.risk-low { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.risk-medium { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.risk-high { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+.risk-critical { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-normal { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.status-suspicious { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.status-blocked { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.description {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timestamp {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.pagination {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pagination-info {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-info {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.security-recommendations {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.security-recommendations h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.recommendation-card {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.recommendation-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.recommendation-content {
+    flex: 1;
+}
+
+.recommendation-content h3 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.recommendation-content p {
+    color: var(--secondary-color);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .security-audit {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+    .filter-actions .btn {
+        width: 100%;
+    }
+
+    .audit-table {
+        overflow-x: auto;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .table-actions .btn {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recommendation-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}

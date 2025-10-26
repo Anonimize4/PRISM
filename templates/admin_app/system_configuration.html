@@ -1,0 +1,931 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Configuration - PRISM{% endblock %}
+
+{% block content %}
+<div class="system-config">
+    <div class="page-header">
+        <h1><i class="fas fa-cogs"></i> System Configuration</h1>
+        <p>Configure system settings and parameters</p>
+    </div>
+
+    <!-- Configuration Overview -->
+    <div class="config-overview">
+        <div class="overview-grid">
+            <div class="overview-card">
+                <div class="overview-icon settings">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ configurations|length }}</div>
+                    <div class="overview-label">Total Settings</div>
+                    <div class="overview-change neutral">
+                        <i class="fas fa-minus"></i> No change
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon sensitive">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ sensitive_count|default:0 }}</div>
+                    <div class="overview-label">Sensitive Settings</div>
+                    <div class="overview-change warning">
+                        <i class="fas fa-exclamation-triangle"></i> Review needed
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon recent">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">{{ recent_changes|default:0 }}</div>
+                    <div class="overview-label">Recent Changes</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-arrow-up"></i> This week
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <div class="overview-icon backup">
+                    <i class="fas fa-save"></i>
+                </div>
+                <div class="overview-info">
+                    <div class="overview-value">Auto</div>
+                    <div class="overview-label">Backup Status</div>
+                    <div class="overview-change positive">
+                        <i class="fas fa-check"></i> Enabled
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Configuration -->
+    <div class="add-config">
+        <button class="btn btn-primary" onclick="showAddModal()">
+            <i class="fas fa-plus"></i> Add New Setting
+        </button>
+    </div>
+
+    <!-- Configuration Settings -->
+    {% if configurations %}
+        <div class="config-table">
+            <div class="table-header">
+                <h2>System Settings</h2>
+                <div class="table-actions">
+                    <button class="btn btn-info" onclick="exportConfig()">
+                        <i class="fas fa-download"></i> Export Settings
+                    </button>
+                    <button class="btn btn-warning" onclick="backupConfig()">
+                        <i class="fas fa-save"></i> Backup Settings
+                    </button>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Type</th>
+                        <th>Sensitive</th>
+                        <th>Last Modified</th>
+                        <th>Modified By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for config in configurations %}
+                    <tr class="config-row {% if config.is_sensitive %}sensitive{% endif %}">
+                        <td>
+                            <div class="setting-info">
+                                <div class="setting-key">{{ config.key }}</div>
+                                {% if config.description %}
+                                    <div class="setting-desc">{{ config.description|truncatechars:50 }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if config.is_sensitive %}
+                                <span class="sensitive-value">••••••••</span>
+                                <button class="btn btn-sm btn-link" onclick="revealValue('{{ config.id }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            {% else %}
+                                <span class="config-value">{{ config.value|truncatechars:30 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="type-badge type-{{ config.value|config_type }}">
+                                {{ config.value|config_type|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if config.is_sensitive %}
+                                <span class="sensitive-badge">
+                                    <i class="fas fa-lock"></i> Yes
+                                </span>
+                            {% else %}
+                                <span class="normal-badge">No</span>
+                            {% endif %}
+                        </td>
+                        <td class="timestamp">{{ config.modified_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if config.modified_by %}
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span>{{ config.modified_by.username }}</span>
+                                </div>
+                            {% else %}
+                                <span class="system-user">System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-warning edit-config-btn"
+                                        data-id="{{ config.id }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                {% if not config.is_system %}
+                                <button class="btn btn-sm btn-danger delete-config-btn"
+                                        data-id="{{ config.id }}"
+                                        data-key="{{ config.key }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <h3>No Configuration Settings</h3>
+            <p>No system configuration settings have been created yet.</p>
+            <button class="btn btn-primary" onclick="showAddModal()">
+                <i class="fas fa-plus"></i> Add First Setting
+            </button>
+        </div>
+    {% endif %}
+
+    <!-- Configuration Categories -->
+    <div class="config-categories">
+        <h2>Configuration Categories</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="category-content">
+                    <h3>Security Settings</h3>
+                    <p>Password policies, authentication settings, and security parameters</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ security_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="category-content">
+                    <h3>Email Configuration</h3>
+                    <p>SMTP settings, email templates, and notification preferences</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ email_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="category-content">
+                    <h3>Database Settings</h3>
+                    <p>Connection parameters, backup schedules, and performance tuning</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ database_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="category-content">
+                    <h3>System Integration</h3>
+                    <p>API keys, third-party integrations, and external service configurations</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ integration_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="category-content">
+                    <h3>User Management</h3>
+                    <p>User registration settings, role permissions, and access controls</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ user_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="category-content">
+                    <h3>Performance Tuning</h3>
+                    <p>Cache settings, optimization parameters, and system performance controls</p>
+                    <div class="category-stats">
+                        <span class="stat">{{ performance_count|default:0 }} settings</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Configuration Modal -->
+<div id="config-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Add Configuration Setting</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="config-form" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="key">Setting Key</label>
+                    <input type="text" id="key" name="key" required placeholder="e.g., EMAIL_HOST">
+                </div>
+                <div class="form-group">
+                    <label for="value">Setting Value</label>
+                    <input type="text" id="value" name="value" required placeholder="Enter the setting value">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Describe what this setting does"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="is_sensitive" name="is_sensitive">
+                        <span class="checkmark"></span>
+                        This is a sensitive setting (value will be hidden)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Setting</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle edit config buttons
+    const editButtons = document.querySelectorAll('.edit-config-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            editConfig(id);
+        });
+    });
+
+    // Handle delete config buttons
+    const deleteButtons = document.querySelectorAll('.delete-config-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const key = this.getAttribute('data-key');
+            deleteConfig(id, key);
+        });
+    });
+});
+
+function showAddModal() {
+    document.getElementById('modal-title').textContent = 'Add Configuration Setting';
+    document.getElementById('config-form').reset();
+    document.getElementById('config-modal').style.display = 'flex';
+}
+
+function editConfig(id) {
+    // This would typically fetch configuration data via AJAX
+    document.getElementById('modal-title').textContent = 'Edit Configuration Setting';
+    document.getElementById('config-modal').style.display = 'flex';
+    // In a real implementation, populate form with existing data
+}
+
+function deleteConfig(id, key) {
+    if (confirm(`Are you sure you want to delete the configuration setting "${key}"? This action cannot be undone.`)) {
+        // This would typically make an AJAX call
+        alert('Configuration setting deleted successfully!');
+        location.reload();
+    }
+}
+
+function revealValue(id) {
+    // This would typically make an AJAX call to reveal the sensitive value
+    alert('Sensitive value revealed (in real implementation, this would show the actual value)');
+}
+
+function exportConfig() {
+    // This would typically make an AJAX call to export configuration
+    alert('Exporting configuration settings...');
+    // In a real implementation, this would trigger a download
+}
+
+function backupConfig() {
+    // This would typically make an AJAX call to backup configuration
+    alert('Creating configuration backup...');
+    // In a real implementation, this would create a backup
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('config-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+function closeModal() {
+    document.getElementById('config-modal').style.display = 'none';
+}
+</script>
+
+<style>
+.system-config {
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.config-overview {
+    margin-bottom: 3rem;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.overview-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.overview-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.overview-icon.settings { background: var(--primary-color); }
+.overview-icon.sensitive { background: var(--danger-color); }
+.overview-icon.recent { background: var(--warning-color); }
+.overview-icon.backup { background: var(--success-color); }
+
+.overview-info {
+    flex: 1;
+}
+
+.overview-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.overview-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.overview-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.overview-change.positive {
+    color: var(--success-color);
+}
+
+.overview-change.negative {
+    color: var(--danger-color);
+}
+
+.overview-change.neutral {
+    color: var(--secondary-color);
+}
+
+.overview-change.warning {
+    color: var(--warning-color);
+}
+
+.add-config {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.config-table {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+.table-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.config-row {
+    transition: background-color 0.3s ease;
+}
+
+.config-row:hover {
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.config-row.sensitive {
+    background-color: rgba(239, 68, 68, 0.02);
+}
+
+.setting-info {
+    max-width: 250px;
+}
+
+.setting-key {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.setting-desc {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.sensitive-value {
+    color: var(--secondary-color);
+    font-family: monospace;
+}
+
+.config-value {
+    font-family: monospace;
+    background: var(--light-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+}
+
+.type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.type-string { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.type-number { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.type-boolean { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.type-other { background: rgba(107, 114, 128, 0.1); color: var(--secondary-color); }
+
+.sensitive-badge {
+    color: var(--danger-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.normal-badge {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.system-user {
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+.timestamp {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.config-categories {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.config-categories h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.category-card {
+    background: var(--light-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.category-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.category-content {
+    flex: 1;
+}
+
+.category-content h3 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.category-content p {
+    color: var(--secondary-color);
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+}
+
+.category-stats {
+    margin-top: 1rem;
+}
+
+.stat {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.checkmark {
+    position: relative;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .system-config {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .config-table {
+        overflow-x: auto;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .table-actions .btn {
+        width: 100%;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

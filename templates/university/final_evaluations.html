@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Final Evaluations - PRISM{% endblock %}
+
+{% block content %}
+<div class="evaluations-container">
+    <div class="page-header">
+        <h1><i class="fas fa-graduation-cap"></i> Final Evaluations</h1>
+        <p>View and manage final internship evaluations and grades</p>
+    </div>
+
+    {% if evaluations %}
+        <div class="evaluations-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ evaluations|length }}</div>
+                <div class="stat-label">Total Evaluations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ evaluations|length|add:"0" }}</div>
+                <div class="stat-label">This Semester</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ evaluations|length|add:"0" }}</div>
+                <div class="stat-label">Average Grade</div>
+            </div>
+        </div>
+
+        <div class="evaluations-list">
+            {% for evaluation in evaluations %}
+            <div class="evaluation-card">
+                <div class="evaluation-header">
+                    <div class="student-info">
+                        <div class="student-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3>{{ evaluation.student.username }}</h3>
+                            <p>{{ evaluation.student.email }}</p>
+                        </div>
+                    </div>
+                    <div class="evaluation-meta">
+                        <div class="grade-badge">
+                            Grade: {{ evaluation.grade }}
+                        </div>
+                        <div class="evaluation-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ evaluation.evaluation_date|date:"M d, Y" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evaluation-content">
+                    <div class="evaluation-section">
+                        <h4>Supervisor</h4>
+                        <p>{{ evaluation.supervisor.user.username }} - {{ evaluation.supervisor.department }}</p>
+                    </div>
+
+                    {% if evaluation.final_feedback %}
+                    <div class="evaluation-section">
+                        <h4>Final Feedback</h4>
+                        <p>{{ evaluation.final_feedback }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="evaluation-actions">
+                    <button class="btn btn-sm btn-info" onclick="viewEvaluation({{ evaluation.id }})">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="editEvaluation({{ evaluation.id }})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="exportEvaluation({{ evaluation.id }})">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3>No Final Evaluations Yet</h3>
+            <p>No final evaluations have been submitted yet. Create evaluations for completed internships.</p>
+            <a href="{% url 'accepted_students' %}" class="btn btn-primary">
+                <i class="fas fa-users"></i> View Students
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Evaluation Detail Modal -->
+<div id="evaluation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Evaluation Details</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="evaluation-details">
+            <!-- Evaluation details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewEvaluation(evaluationId) {
+    // This would typically make an AJAX call to load evaluation details
+    // For now, redirect to a detail view
+    window.location.href = `/university/evaluation/${evaluationId}/`;
+}
+
+function editEvaluation(evaluationId) {
+    // Redirect to edit evaluation page
+    window.location.href = `/university/evaluation/${evaluationId}/edit/`;
+}
+
+function exportEvaluation(evaluationId) {
+    // Export evaluation as PDF or document
+    window.open(`/university/evaluation/${evaluationId}/export/`, '_blank');
+}
+
+function closeModal() {
+    document.getElementById('evaluation-modal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('evaluation-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+</script>
+
+<style>
+.evaluations-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.evaluations-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.evaluations-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.evaluation-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.evaluation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.evaluation-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.student-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.student-info p {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.evaluation-meta {
+    text-align: right;
+}
+
+.grade-badge {
+    background: var(--success-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.evaluation-date {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.evaluation-content {
+    padding: 1.5rem;
+}
+
+.evaluation-section {
+    margin-bottom: 2rem;
+}
+
+.evaluation-section h4 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.evaluation-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.evaluation-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .evaluations-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .evaluations-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .evaluation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .evaluation-meta {
+        text-align: left;
+        width: 100%;
+    }
+
+    .evaluation-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .evaluation-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

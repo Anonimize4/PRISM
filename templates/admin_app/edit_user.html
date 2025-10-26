@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit User - PRISM{% endblock %}
+
+{% block content %}
+<div class="edit-user">
+    <div class="page-header">
+        <h1><i class="fas fa-user-edit"></i> Edit User</h1>
+        <p>Modify user information and permissions</p>
+    </div>
+
+    <div class="user-info-card">
+        <div class="user-header">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-details">
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <p>{{ user.email }}</p>
+                <div class="user-meta">
+                    <span class="role-badge role-{{ user.role }}">
+                        {{ user.get_role_display }}
+                    </span>
+                    <span class="status-badge {{ user.is_active|yesno:'active,inactive' }}">
+                        {{ user.is_active|yesno:'Active,Inactive' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="user-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" readonly
+                           style="background-color: #f8f9fa; cursor: not-allowed;">
+                    <small class="form-help">Username cannot be changed.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    <small class="form-help">Required. Enter a valid email address.</small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}"
+                           maxlength="30">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}"
+                           maxlength="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Role & Permissions</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="role">User Role *</label>
+                    <select id="role" name="role" required>
+                        <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+                        <option value="company" {% if user.role == 'company' %}selected{% endif %}>Company</option>
+                        <option value="university" {% if user.role == 'university' %}selected{% endif %}>University</option>
+                        <option value="supervisor" {% if user.role == 'supervisor' %}selected{% endif %}>Supervisor</option>
+                        <option value="mentor" {% if user.role == 'mentor' %}selected{% endif %}>Mentor</option>
+                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <small class="form-help">Required. Choose the appropriate role for this user.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="is_active">Account Status</label>
+                    <select id="is_active" name="is_active">
+                        <option value="on" {% if user.is_active %}selected{% endif %}>Active</option>
+                        <option value="off" {% if not user.is_active %}selected{% endif %}>Inactive</option>
+                    </select>
+                    <small class="form-help">Active users can log in and use the system.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Account Information</h2>
+            <div class="account-details">
+                <div class="detail-item">
+                    <span class="detail-label">Date Joined:</span>
+                    <span class="detail-value">{{ user.date_joined|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Last Login:</span>
+                    <span class="detail-value">
+                        {% if user.last_login %}
+                            {{ user.last_login|date:"M d, Y H:i" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Account Status:</span>
+                    <span class="detail-value">
+                        {% if user.is_active %}
+                            <span class="status-active">Active</span>
+                        {% else %}
+                            <span class="status-inactive">Inactive</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Staff Status:</span>
+                    <span class="detail-value">
+                        {% if user.is_staff %}
+                            <span class="status-active">Staff</span>
+                        {% else %}
+                            <span class="status-inactive">Regular User</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{% url 'admin_app:user_management' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+            {% if user != request.user %}
+            <a href="{% url 'admin_app:delete_user' user.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete User
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<style>
+.edit-user {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.user-info-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.user-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.user-details h2 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.user-details p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+}
+
+.user-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-badge.role-student { background: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.role-badge.role-company { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.role-badge.role-university { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.role-badge.role-supervisor { background: rgba(139, 69, 19, 0.1); color: #8B4513; }
+.role-badge.role-mentor { background: rgba(147, 51, 234, 0.1); color: #9333EA; }
+.role-badge.role-admin { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+.status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+.user-form {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 2rem;
+}
+
+.form-section h2 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h2::before {
+    content: "📝";
+    font-size: 1.2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 1rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.form-help {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.account-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.detail-value {
+    color: var(--secondary-color);
+}
+
+.status-active {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .edit-user {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .user-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .user-form {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .account-details {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

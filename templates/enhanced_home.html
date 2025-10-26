@@ -1,0 +1,753 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}PRISM - Advanced Internship Management System{% endblock %}
+
+{% block content %}
+<!-- Enhanced Hero Section -->
+<section class="hero-section enhanced-hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title animate-fade-in">
+                Welcome to <span class="gradient-text">PRISM</span>
+            </h1>
+            <p class="hero-subtitle animate-fade-in-delay">
+                The most advanced internship management system with AI-powered matching, 
+                real-time collaboration, and comprehensive analytics for students, companies, and universities.
+            </p>
+            <div class="hero-buttons animate-fade-in-delay-2">
+                <a href="{% url 'register' %}" class="btn btn-primary cyber-button btn-lg">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+                <a href="{% url 'about' %}" class="btn btn-secondary cyber-button btn-lg">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="hero-illustration">
+                <i class="fas fa-graduation-cap animate-float"></i>
+                <i class="fas fa-briefcase animate-float" style="animation-delay: 1s;"></i>
+                <i class="fas fa-university animate-float" style="animation-delay: 2s;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interactive Stats -->
+    <div class="hero-stats animate-slide-in-right">
+        <div class="stat-item">
+            <div class="stat-number" data-target="10000">0</div>
+            <div class="stat-label">Students</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="500">0</div>
+            <div class="stat-label">Companies</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="95">0</div>
+            <div class="stat-label">Success Rate %</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="24">0</div>
+            <div class="stat-label">Countries</div>
+        </div>
+    </div>
+</section>
+
+<!-- AI-Powered Features Section -->
+<section class="features-section enhanced-features">
+    <div class="container">
+        <div class="section-header animate-fade-in">
+            <h2 class="section-title gradient-text">AI-Powered Features</h2>
+            <p class="section-subtitle">Experience the future of internship management with cutting-edge technology</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card interactive-card animate-on-scroll">
+                <div class="feature-icon quantum-indicator">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Smart Matching</h3>
+                <p>Our AI algorithms analyze skills, preferences, and requirements to match students with perfect internship opportunities.</p>
+                <div class="feature-highlights">
+                    <span class="highlight-tag"><i class="fas fa-check"></i> 95% Accuracy</span>
+                    <span class="highlight-tag"><i class="fas fa-check"></i> Real-time Updates</span>
+                </div>
+            </div>
+            
+            <div class="feature-card interactive-card animate-on-scroll" style="animation-delay: 0.1s;">
+                <div class="feature-icon quantum-indicator">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Performance Analytics</h3>
+                <p>Track progress, identify trends, and make data-driven decisions with comprehensive analytics and reporting tools.</p>
+                <div class="feature-highlights">
+                    <span class="highlight-tag"><i class="fas fa-check"></i> Real-time Data</span>
+                    <span class="highlight-tag"><i class="fas fa-check"></i> Custom Reports</span>
+                </div>
+            </div>
+            
+            <div class="feature-card interactive-card animate-on-scroll" style="animation-delay: 0.2s;">
+                <div class="feature-icon quantum-indicator">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>Real-time Communication</h3>
+                <p>Stay connected with instant messaging, video calls, and collaborative tools designed for seamless teamwork.</p>
+                <div class="feature-highlights">
+                    <span class="highlight-tag"><i class="fas fa-check"></i> Video Calls</span>
+                    <span class="highlight-tag"><i class="fas fa-check"></i> File Sharing</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced Dashboard Preview -->
+<section class="dashboard-preview-section">
+    <div class="container">
+        <div class="section-header animate-fade-in">
+            <h2 class="section-title gradient-text">Advanced Dashboard</h2>
+            <p class="section-subtitle">Experience a unified interface with real-time insights and intelligent workflows</p>
+        </div>
+        
+        <div class="dashboard-grid-enhanced">
+            <div class="advanced-metric-card animate-on-scroll">
+                <div class="card-header">
+                    <h3 class="card-title">Live Applications</h3>
+                    <div class="quantum-indicator">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                </div>
+                <div class="card-value realtime-metric" data-value="1,247">1,247</div>
+                <div class="card-description">Active internship applications</div>
+                <div class="progress-bar-advanced">
+                    <div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+                </div>
+            </div>
+            
+            <div class="advanced-metric-card animate-on-scroll" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <h3 class="card-title">Success Rate</h3>
+                    <div class="quantum-indicator">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                </div>
+                <div class="card-value realtime-metric" data-value="94">94%</div>
+                <div class="card-description">Students matched successfully</div>
+                <div class="progress-bar-advanced">
+                    <div class="progress-fill" style="width: 94%; background: linear-gradient(90deg, #10b981, #059669);"></div>
+                </div>
+            </div>
+            
+            <div class="advanced-metric-card animate-on-scroll" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h3 class="card-title">Active Companies</h3>
+                    <div class="quantum-indicator">
+                        <i class="fas fa-building"></i>
+                    </div>
+                </div>
+                <div class="card-value realtime-metric" data-value="342">342</div>
+                <div class="card-description">Partner companies worldwide</div>
+                <div class="progress-bar-advanced">
+                    <div class="progress-fill" style="width: 68%; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+                </div>
+            </div>
+            
+            <div class="advanced-metric-card animate-on-scroll" style="animation-delay: 0.3s;">
+                <div class="card-header">
+                    <h3 class="card-title">University Partners</h3>
+                    <div class="quantum-indicator">
+                        <i class="fas fa-university"></i>
+                    </div>
+                </div>
+                <div class="card-value realtime-metric" data-value="89">89</div>
+                <div class="card-description">Educational institutions</div>
+                <div class="progress-bar-advanced">
+                    <div class="progress-fill" style="width: 45%; background: linear-gradient(90deg, #06b6d4, #0891b2);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Real-time Collaboration Section -->
+<section class="collaboration-section">
+    <div class="container">
+        <div class="section-header animate-fade-in">
+            <h2 class="section-title gradient-text">Real-time Collaboration</h2>
+            <p class="section-subtitle">Connect, communicate, and collaborate seamlessly with advanced tools</p>
+        </div>
+        
+        <div class="collaboration-grid">
+            <div class="collab-card holographic-card animate-slide-in-left">
+                <div class="collab-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <h3>Video Conferencing</h3>
+                <p>HD video calls with screen sharing, recording, and interactive whiteboard for effective virtual meetings.</p>
+                <div class="collab-features">
+                    <span><i class="fas fa-users"></i> Up to 50 participants</span>
+                    <span><i class="fas fa-record-vinyl"></i> Recording available</span>
+                </div>
+            </div>
+            
+            <div class="collab-card holographic-card animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="collab-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>Instant Messaging</h3>
+                <p>Real-time chat with file sharing, emojis, and group conversations for seamless team communication.</p>
+                <div class="collab-features">
+                    <span><i class="fas fa-paperclip"></i> File sharing</span>
+                    <span><i class="fas fa-bell"></i> Push notifications</span>
+                </div>
+            </div>
+            
+            <div class="collab-card holographic-card animate-slide-in-right" style="animation-delay: 0.4s;">
+                <div class="collab-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3>Project Management</h3>
+                <p>Advanced task management with deadlines, dependencies, and progress tracking for successful project completion.</p>
+                <div class="collab-features">
+                    <span><i class="fas fa-calendar"></i> Smart scheduling</span>
+                    <span><i class="fas fa-chart-pie"></i> Progress analytics</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Testimonials -->
+<section class="testimonials-section enhanced-testimonials">
+    <div class="container">
+        <div class="section-header animate-fade-in">
+            <h2 class="section-title gradient-text">Success Stories</h2>
+            <p class="section-subtitle">Hear from our satisfied users about their experience with PRISM</p>
+        </div>
+        
+        <div class="testimonials-grid">
+            <div class="testimonial-card interactive-card animate-on-scroll">
+                <div class="testimonial-content">
+                    "PRISM revolutionized our internship program. The AI matching system helped us find perfect candidates quickly, and the real-time collaboration tools made remote internships seamless."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="author-info">
+                        <h4>Sarah Johnson</h4>
+                        <span>Tech Innovation Inc.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card interactive-card animate-on-scroll" style="animation-delay: 0.1s;">
+                <div class="testimonial-content">
+                    "As a university coordinator, I love how PRISM provides comprehensive analytics and real-time updates. It's made managing student internships incredibly efficient."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="author-info">
+                        <h4>Dr. Michael Chen</h4>
+                        <span>Stanford University</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card interactive-card animate-on-scroll" style="animation-delay: 0.2s;">
+                <div class="testimonial-content">
+                    "The AI-powered matching connected me with an internship that perfectly matched my skills and interests. The real-time communication kept me engaged throughout the program."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <h4>Emily Rodriguez</h4>
+                        <span>Computer Science Student</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced CTA Section -->
+<section class="cta-section enhanced-cta">
+    <div class="container">
+        <div class="cta-content animate-fade-in">
+            <h2 class="gradient-text">Ready to Transform Your Internship Experience?</h2>
+            <p>Join thousands of students, companies, and universities already using PRISM for their internship management needs.</p>
+            <div class="cta-buttons">
+                <a href="{% url 'register' %}" class="btn btn-primary cyber-button btn-lg">
+                    <i class="fas fa-rocket"></i> Get Started Free
+                </a>
+                <a href="#" class="btn btn-secondary cyber-button btn-lg" onclick="scheduleDemo()">
+                    <i class="fas fa-calendar-check"></i> Schedule Demo
+                </a>
+            </div>
+        </div>
+        
+        <div class="cta-features animate-slide-in-up">
+            <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Enterprise-grade security</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-headset"></i>
+                <span>24/7 support</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Mobile apps available</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-globe"></i>
+                <span>Global reach</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Enhanced counter animation for hero stats
+function animateAdvancedCounter(element) {
+    const target = parseInt(element.getAttribute('data-target'));
+    const duration = 3000; // 3 seconds
+    const step = target / (duration / 16);
+    let current = 0;
+    const isPercentage = element.textContent.includes('%');
+
+    const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            element.textContent = target + (isPercentage ? '%' : '').toLocaleString();
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current).toLocaleString() + (isPercentage ? '%' : '');
+        }
+    }, 16);
+}
+
+// Initialize advanced animations when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate hero stats
+    setTimeout(() => {
+        document.querySelectorAll('.hero-stats .stat-number').forEach(counter => {
+            animateAdvancedCounter(counter);
+        });
+    }, 1000);
+
+    // Animate dashboard metrics
+    const metricObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const element = entry.target;
+                const value = element.getAttribute('data-value');
+                element.textContent = value;
+                element.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+                metricObserver.unobserve(element);
+            }
+        });
+    });
+
+    document.querySelectorAll('.realtime-metric').forEach(metric => {
+        metricObserver.observe(metric);
+    });
+
+    // Schedule demo function
+    window.scheduleDemo = function() {
+        // Create modal for demo scheduling
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Schedule a Demo</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="handleDemoSubmit(event)">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="organization">Organization</label>
+                            <input type="text" id="organization" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Preferred Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="time">Preferred Time</label>
+                            <input type="time" id="time" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary cyber-button">Schedule Demo</button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    };
+
+    // Handle demo submission
+    window.handleDemoSubmit = function(event) {
+        event.preventDefault();
+        // Create success notification
+        const notification = document.createElement('div');
+        notification.className = 'notification success';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            Demo scheduled successfully! We'll contact you within 24 hours.
+        `;
+        document.querySelector('.notification-panel').appendChild(notification);
+        
+        // Close modal
+        document.querySelector('.modal-overlay').remove();
+        
+        // Remove notification after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    };
+
+    // Add interactive hover effects
+    document.querySelectorAll('.interactive-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Parallax effect for hero section
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const hero = document.querySelector('.enhanced-hero');
+        if (hero) {
+            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        }
+    });
+});
+</script>
+
+<style>
+/* Enhanced hero section */
+.enhanced-hero {
+    position: relative;
+    padding: 8rem 0 6rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+}
+
+.enhanced-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    animation: gradientShift 8s ease-in-out infinite;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 4rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.hero-stats .stat-item {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 200px;
+}
+
+.hero-stats .stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.hero-stats .stat-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Enhanced features */
+.enhanced-features .feature-card {
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.feature-highlights {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.highlight-tag {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Dashboard preview */
+.dashboard-grid-enhanced {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.advanced-metric-card .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+/* Collaboration section */
+.collaboration-section {
+    background: var(--light-color);
+    padding: 6rem 0;
+}
+
+.collaboration-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.collab-card {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.collab-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+.collab-features {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.collab-features span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Enhanced testimonials */
+.enhanced-testimonials .testimonial-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+}
+
+.testimonial-content {
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: var(--secondary-color);
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.author-info h4 {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.author-info span {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Enhanced CTA */
+.enhanced-cta {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.cta-features {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+}
+
+.cta-features .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    font-weight: 500;
+}
+
+.cta-features i {
+    font-size: 1.2rem;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-body .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-body label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.modal-body input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.modal-body input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .hero-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .collaboration-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-features {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .highlight-tag {
+        font-size: 0.75rem;
+    }
+}
+</style>
+{% endblock %}

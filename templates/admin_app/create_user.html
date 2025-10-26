@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create User - PRISM{% endblock %}
+
+{% block content %}
+<div class="create-user">
+    <div class="page-header">
+        <h1><i class="fas fa-user-plus"></i> Create New User</h1>
+        <p>Add a new user to the system with appropriate role and permissions</p>
+    </div>
+
+    <form method="post" class="user-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" required
+                           placeholder="Enter username" maxlength="150">
+                    <small class="form-help">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="Enter email address">
+                    <small class="form-help">Required. Enter a valid email address.</small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name"
+                           placeholder="Enter first name" maxlength="30">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name"
+                           placeholder="Enter last name" maxlength="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Security</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required
+                           placeholder="Enter password" minlength="8">
+                    <small class="form-help">Required. At least 8 characters.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required
+                           placeholder="Confirm password" minlength="8">
+                    <small class="form-help">Enter the same password as above, for verification.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Role & Permissions</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="role">User Role *</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select a role</option>
+                        <option value="student">Student</option>
+                        <option value="company">Company</option>
+                        <option value="university">University</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="mentor">Mentor</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <small class="form-help">Required. Choose the appropriate role for this user.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="is_active">Account Status</label>
+                    <select id="is_active" name="is_active">
+                        <option value="on" selected>Active</option>
+                        <option value="off">Inactive</option>
+                    </select>
+                    <small class="form-help">Active users can log in and use the system.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-info">
+            <h3>Role Information</h3>
+            <div class="role-descriptions">
+                <div class="role-item" data-role="student">
+                    <h4><i class="fas fa-user-graduate"></i> Student</h4>
+                    <p>Students can apply for internships, submit reports, and track their progress.</p>
+                </div>
+
+                <div class="role-item" data-role="company">
+                    <h4><i class="fas fa-building"></i> Company</h4>
+                    <p>Companies can post internships, review applications, and manage their internship programs.</p>
+                </div>
+
+                <div class="role-item" data-role="university">
+                    <h4><i class="fas fa-university"></i> University</h4>
+                    <p>University staff can oversee student internships, assign supervisors, and manage evaluations.</p>
+                </div>
+
+                <div class="role-item" data-role="supervisor">
+                    <h4><i class="fas fa-user-tie"></i> Supervisor</h4>
+                    <p>Academic supervisors guide students, review reports, and provide evaluations.</p>
+                </div>
+
+                <div class="role-item" data-role="mentor">
+                    <h4><i class="fas fa-hands-helping"></i> Mentor</h4>
+                    <p>Mentors provide guidance and support to students throughout their internship journey.</p>
+                </div>
+
+                <div class="role-item" data-role="admin">
+                    <h4><i class="fas fa-cog"></i> Admin</h4>
+                    <p>Administrators have full system access and can manage users, roles, and system settings.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Create User
+            </button>
+            <a href="{% url 'admin_app:user_management' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const roleItems = document.querySelectorAll('.role-item');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+
+    // Show role information
+    roleSelect.addEventListener('change', function() {
+        const selectedRole = this.value;
+
+        roleItems.forEach(item => {
+            if (item.dataset.role === selectedRole) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Password confirmation validation
+    confirmPassword.addEventListener('input', function() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    });
+
+    password.addEventListener('input', function() {
+        if (confirmPassword.value && password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    });
+
+    // Form validation
+    const form = document.querySelector('.user-form');
+    form.addEventListener('submit', function(e) {
+        if (password.value !== confirmPassword.value) {
+            e.preventDefault();
+            alert('Passwords do not match. Please try again.');
+            return false;
+        }
+
+        if (password.value.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            return false;
+        }
+    });
+});
+</script>
+
+<style>
+.create-user {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.user-form {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 2rem;
+}
+
+.form-section h2 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h2::before {
+    content: "📝";
+    font-size: 1.2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 1rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group input:invalid,
+.form-group select:invalid {
+    border-color: var(--danger-color);
+}
+
+.form-help {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.role-info {
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.role-info h3 {
+    color: var(--dark-color);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.role-descriptions {
+    display: grid;
+    gap: 1rem;
+}
+
+.role-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.role-item:first-child {
+    display: block; /* Show first role by default */
+}
+
+.role-item h4 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.role-item p {
+    color: var(--secondary-color);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .create-user {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .user-form {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .role-info {
+        padding: 1.5rem;
+    }
+
+    .role-descriptions {
+        gap: 0.75rem;
+    }
+
+    .role-item {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

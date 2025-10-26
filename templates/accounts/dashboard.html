@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="dashboard-welcome">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Welcome to PRISM</h1>
+            <div class="card-icon primary">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="card-description">Hello, <strong>{{ user.username }}</strong> ({{ user.role|title }})</p>
+            <p>Please select your dashboard from the navigation menu above.</p>
+            
+            <div class="dashboard-grid" style="margin-top: 2rem;">
+                {% if user.role == 'student' %}
+                <div class="card">
+                    <div class="card-icon success">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Student Dashboard</h3>
+                    <p>Manage your applications, submit reports, and track your internship progress.</p>
+                    <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Go to Student Dashboard</a>
+                </div>
+                {% elif user.role == 'company' %}
+                <div class="card">
+                    <div class="card-icon primary">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>Company Dashboard</h3>
+                    <p>Manage applications, create teams, and evaluate student performance.</p>
+                    <a href="{% url 'company_dashboard' %}" class="btn btn-primary">Go to Company Dashboard</a>
+                </div>
+                {% elif user.role == 'university' %}
+                <div class="card">
+                    <div class="card-icon info">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3>University Dashboard</h3>
+                    <p>Track student performance, assign supervisors, and manage evaluations.</p>
+                    <a href="{% url 'university_dashboard' %}" class="btn btn-primary">Go to University Dashboard</a>
+                </div>
+                {% elif user.role == 'admin' %}
+                <div class="card">
+                    <div class="card-icon danger">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>Admin Dashboard</h3>
+                    <p>Manage users, monitor system health, and configure system settings.</p>
+                    <a href="{% url 'admin_app:admin_dashboard' %}" class="btn btn-primary">Go to Admin Dashboard</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

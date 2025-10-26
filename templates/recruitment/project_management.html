@@ -1,0 +1,529 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Management - PRISM{% endblock %}
+
+{% block content %}
+<div class="projects-container">
+    <div class="page-header">
+        <h1><i class="fas fa-project-diagram"></i> Project Management</h1>
+        <p>Monitor project progress and manage internship assignments</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-bar">
+        <a href="{% url 'create_project' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Project
+        </a>
+        <a href="{% url 'create_team' %}" class="btn btn-success">
+            <i class="fas fa-users"></i> Create Team
+        </a>
+    </div>
+
+    {% if projects %}
+        <div class="projects-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ projects|length }}</div>
+                <div class="stat-label">Total Projects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ projects|length|add:"0" }}</div>
+                <div class="stat-label">Active Projects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ projects|length|add:"0" }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+
+        <div class="projects-grid">
+            {% for project in projects %}
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-info">
+                        <h3>{{ project.title }}</h3>
+                        <p class="team-name">
+                            <i class="fas fa-users"></i>
+                            Team: {{ project.team.name }}
+                        </p>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge active">Active</span>
+                    </div>
+                </div>
+
+                <div class="project-content">
+                    <div class="project-section">
+                        <h4>Objectives</h4>
+                        <p>{{ project.objectives|truncatechars:150 }}</p>
+                    </div>
+
+                    <div class="project-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-label">Start Date</div>
+                            <div class="timeline-value">{{ project.start_date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">End Date</div>
+                            <div class="timeline-value">{{ project.end_date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">Duration</div>
+                            <div class="timeline-value">{{ project.start_date|timesince:project.end_date|cut:" ago" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-team-members">
+                    <h4>Team Members ({{ project.team.members.count }})</h4>
+                    <div class="members-list">
+                        {% for member in project.team.members.all %}
+                        <div class="member-chip">
+                            <div class="member-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>{{ member.username }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="no-members">No team members assigned</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="project-actions">
+                    <button class="btn btn-sm btn-info" onclick="viewProjectDetails({{ project.id }})">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="editProject({{ project.id }})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="markComplete({{ project.id }})">
+                        <i class="fas fa-check"></i> Mark Complete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <h3>No Projects Yet</h3>
+            <p>You haven't created any projects yet. Start by creating your first project.</p>
+            <a href="{% url 'create_project' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create First Project
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Project Details Modal -->
+<div id="project-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Project Details</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="project-details">
+            <!-- Project details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewProjectDetails(projectId) {
+    // This would typically make an AJAX call to load project details
+    // For now, redirect to a detail view
+    window.location.href = `/recruitment/project/${projectId}/`;
+}
+
+function editProject(projectId) {
+    // Redirect to edit project page
+    window.location.href = `/recruitment/project/${projectId}/edit/`;
+}
+
+function markComplete(projectId) {
+    if (confirm('Are you sure you want to mark this project as complete?')) {
+        // This would typically make an AJAX call to update project status
+        alert('Project marked as complete!');
+        location.reload();
+    }
+}
+
+function closeModal() {
+    document.getElementById('project-modal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('project-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+</script>
+
+<style>
+.projects-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.actions-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.projects-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.project-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.project-header {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.team-name {
+    color: var(--secondary-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.project-status {
+    text-align: right;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.project-content {
+    padding: 1.5rem;
+}
+
+.project-section {
+    margin-bottom: 2rem;
+}
+
+.project-section h4 {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.project-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.project-timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.timeline-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+}
+
+.timeline-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.timeline-value {
+    font-size: 1rem;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.project-team-members {
+    padding: 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.project-team-members h4 {
+    color: var(--dark-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.members-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.member-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+}
+
+.member-avatar {
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.no-members {
+    color: var(--secondary-color);
+    font-style: italic;
+    margin: 0;
+}
+
+.project-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .projects-container {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .actions-bar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .actions-bar .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .projects-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .project-timeline {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .project-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .project-actions .btn {
+        width: 100%;
+    }
+
+    .members-list {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

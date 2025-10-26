@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Status - PRISM{% endblock %}
+
+{% block content %}
+<div class="applications-container">
+    <div class="page-header">
+        <h1><i class="fas fa-file-alt"></i> My Applications</h1>
+        <p>Track the status of your internship applications</p>
+    </div>
+
+    {% if page_obj %}
+        <div class="applications-grid">
+            {% for application in page_obj %}
+            <div class="application-card">
+                <div class="application-header">
+                    <div class="company-info">
+                        <div class="company-avatar">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <h3>{{ application.company.username }}</h3>
+                            <p>Applied {{ application.applied_date|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="application-status">
+                        <span class="status-badge {{ application.status }}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="application-content">
+                    <div class="application-section">
+                        <h4>Personal Information</h4>
+                        <p>{{ application.personal_info|truncatechars:150 }}</p>
+                    </div>
+
+                    <div class="application-section">
+                        <h4>Academic Details</h4>
+                        <p>{{ application.academic_details|truncatechars:150 }}</p>
+                    </div>
+
+                    <div class="application-section">
+                        <h4>Preferences</h4>
+                        <p>{{ application.preferences|truncatechars:150 }}</p>
+                    </div>
+                </div>
+
+                <div class="application-actions">
+                    {% if application.status == 'accepted' %}
+                        <a href="{% url 'submit_weekly_report' %}" class="btn btn-success">
+                            <i class="fas fa-file-text"></i> Submit Report
+                        </a>
+                        <a href="{% url 'report_history' %}" class="btn btn-info">
+                            <i class="fas fa-history"></i> View Reports
+                        </a>
+                    {% endif %}
+                    <button class="btn btn-secondary" onclick="toggleDetails(this)">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                </div>
+
+                <div class="application-details" style="display: none;">
+                    <div class="details-section">
+                        <h4>Full Personal Information</h4>
+                        <p>{{ application.personal_info }}</p>
+                    </div>
+                    <div class="details-section">
+                        <h4>Full Academic Details</h4>
+                        <p>{{ application.academic_details }}</p>
+                    </div>
+                    <div class="details-section">
+                        <h4>Full Preferences</h4>
+                        <p>{{ application.preferences }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            {% endif %}
+
+            <span class="page-info">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>No Applications Yet</h3>
+            <p>You haven't submitted any internship applications yet.</p>
+            <a href="{% url 'create_application' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Your First Application
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleDetails(button) {
+    const card = button.closest('.application-card');
+    const details = card.querySelector('.application-details');
+    const icon = button.querySelector('i');
+
+    if (details.style.display === 'none' || details.style.display === '') {
+        details.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Details';
+    } else {
+        details.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-eye"></i> View Details';
+    }
+}
+</script>
+
+<style>
+.applications-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.applications-grid {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.application-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.application-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.application-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--light-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.company-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.company-avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.company-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.company-info p {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-badge.accepted {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-badge.rejected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.application-content {
+    padding: 1.5rem;
+}
+
+.application-section {
+    margin-bottom: 1.5rem;
+}
+
+.application-section h4 {
+    color: var(--dark-color);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.application-section p {
+    color: var(--secondary-color);
+    line-height: 1.5;
+}
+
+.application-actions {
+    padding: 1rem 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.application-details {
+    padding: 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.details-section {
+    margin-bottom: 1.5rem;
+}
+
+.details-section h4 {
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.details-section p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-info {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .application-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .application-actions {
+        flex-direction: column;
+    }
+
+    .application-actions .btn {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-cog"></i> Admin Dashboard</h1>
+        <p>System administration and monitoring</p>
+    </div>
+
+    <!-- System Health Overview -->
+    {% if system_health %}
+    <div class="health-overview">
+        <h2>System Health</h2>
+        <div class="health-metrics">
+            <div class="metric-card">
+                <div class="metric-icon cpu">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ system_health.cpu_usage }}%</div>
+                    <div class="metric-label">CPU Usage</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon memory">
+                    <i class="fas fa-memory"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ system_health.memory_usage }}%</div>
+                    <div class="metric-label">Memory Usage</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon disk">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ system_health.disk_usage }}%</div>
+                    <div class="metric-label">Disk Usage</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ system_health.active_users }}</div>
+                    <div class="metric-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number">{{ active_users }}</div>
+                <div class="stat-label">Active Users (7 days)</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon applications">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number">{{ total_applications }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number">{{ pending_applications }}</div>
+                <div class="stat-label">Pending Applications</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{% url 'admin_app:user_management' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <div class="action-info">
+                    <h3>User Management</h3>
+                    <p>Manage users and roles</p>
+                </div>
+            </a>
+
+            <a href="{% url 'admin_app:create_user' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="action-info">
+                    <h3>Create User</h3>
+                    <p>Add new system users</p>
+                </div>
+            </a>
+
+            <a href="{% url 'admin_app:system_health_monitoring' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="action-info">
+                    <h3>System Health</h3>
+                    <p>Monitor system performance</p>
+                </div>
+            </a>
+
+            <a href="{% url 'admin_app:system_logs' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <div class="action-info">
+                    <h3>System Logs</h3>
+                    <p>View system activity logs</p>
+                </div>
+            </a>
+
+            <a href="{% url 'admin_app:security_audit' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="action-info">
+                    <h3>Security Audit</h3>
+                    <p>Review security events</p>
+                </div>
+            </a>
+
+            <a href="{% url 'admin_app:system_configuration' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="action-info">
+                    <h3>System Config</h3>
+                    <p>Configure system settings</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <h2>Recent User Activity</h2>
+        {% if recent_activities %}
+            <div class="activity-list">
+                {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-user">{{ activity.user.username }}</div>
+                        <div class="activity-description">{{ activity.description }}</div>
+                        <div class="activity-time">{{ activity.timestamp|date:"M d, Y H:i" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-activity">No recent user activity.</p>
+        {% endif %}
+    </div>
+
+    <!-- System Logs -->
+    <div class="system-logs">
+        <h2>Recent System Logs</h2>
+        {% if recent_logs %}
+            <div class="logs-list">
+                {% for log in recent_logs %}
+                <div class="log-item log-{{ log.level|lower }}">
+                    <div class="log-level">{{ log.level }}</div>
+                    <div class="log-content">
+                        <div class="log-message">{{ log.message }}</div>
+                        {% if log.user %}
+                        <div class="log-user">User: {{ log.user.username }}</div>
+                        {% endif %}
+                        <div class="log-time">{{ log.timestamp|date:"M d, Y H:i" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-logs">No recent system logs.</p>
+        {% endif %}
+    </div>
+
+    <!-- Active Notifications -->
+    {% if active_notifications %}
+    <div class="active-notifications">
+        <h2>Active System Notifications</h2>
+        <div class="notifications-list">
+            {% for notification in active_notifications %}
+            <div class="notification-item priority-{{ notification.priority }}">
+                <div class="notification-header">
+                    <h3>{{ notification.title }}</h3>
+                    <span class="notification-type">{{ notification.notification_type|title }}</span>
+                </div>
+                <div class="notification-content">
+                    <p>{{ notification.message }}</p>
+                    <div class="notification-meta">
+                        <span class="priority">Priority: {{ notification.priority|title }}</span>
+                        {% if notification.expires_at %}
+                        <span class="expires">Expires: {{ notification.expires_at|date:"M d, Y H:i" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.dashboard-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.health-overview {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.health-overview h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.health-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.metric-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.metric-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.metric-icon.cpu { background: var(--primary-color); }
+.metric-icon.memory { background: var(--success-color); }
+.metric-icon.disk { background: var(--warning-color); }
+.metric-icon.users { background: var(--info-color); }
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-icon.users { background: var(--primary-color); }
+.stat-icon.active { background: var(--success-color); }
+.stat-icon.applications { background: var(--info-color); }
+.stat-icon.pending { background: var(--warning-color); }
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.quick-actions {
+    margin-bottom: 3rem;
+}
+
+.quick-actions h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.action-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.action-info h3 {
+    color: var(--dark-color);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.action-info p {
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.recent-activity,
+.system-logs,
+.active-notifications {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.recent-activity h2,
+.system-logs h2,
+.active-notifications h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.activity-list,
+.logs-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.activity-item,
+.log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.activity-icon,
+.log-level {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.log-level {
+    background: var(--secondary-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.activity-content,
+.log-content {
+    flex: 1;
+}
+
+.activity-user,
+.log-message {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.activity-description,
+.log-user {
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.activity-time,
+.log-time {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.no-activity,
+.no-logs {
+    text-align: center;
+    color: var(--secondary-color);
+    font-style: italic;
+    padding: 2rem;
+}
+
+.notifications-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.notification-item {
+    border-radius: var(--radius-md);
+    border-left: 4px solid;
+    padding: 1.5rem;
+    background: var(--light-color);
+}
+
+.notification-item.priority-low { border-left-color: var(--info-color); }
+.notification-item.priority-medium { border-left-color: var(--warning-color); }
+.notification-item.priority-high { border-left-color: var(--danger-color); }
+.notification-item.priority-critical { border-left-color: var(--danger-color); }
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.notification-header h3 {
+    color: var(--dark-color);
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.notification-type {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.notification-content p {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.notification-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.notification-meta span {
+    color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        margin: 1rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .health-metrics,
+    .stats-grid,
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card,
+    .stat-card,
+    .action-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .activity-item,
+    .log-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .notification-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

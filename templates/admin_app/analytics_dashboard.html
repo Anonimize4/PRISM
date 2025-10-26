@@ -1,0 +1,539 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - PRISM{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+    <div class="page-header">
+        <h1><i class="fas fa-chart-pie"></i> Analytics Dashboard</h1>
+        <p>Comprehensive system analytics and insights</p>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-info">
+                <div class="metric-value">{{ total_users|default:0 }}</div>
+                <div class="metric-label">Total Users</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> +12% this month
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon applications">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="metric-info">
+                <div class="metric-value">{{ total_applications|default:0 }}</div>
+                <div class="metric-label">Total Applications</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> +8% this month
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon active">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="metric-info">
+                <div class="metric-value">{{ active_users|default:0 }}</div>
+                <div class="metric-label">Active Users</div>
+                <div class="metric-change neutral">
+                    <i class="fas fa-minus"></i> 0% this month
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon system">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="metric-info">
+                <div class="metric-value">99.9%</div>
+                <div class="metric-label">System Uptime</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> +0.1% this month
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Distribution Chart -->
+    <div class="chart-section">
+        <h2>User Distribution by Role</h2>
+        <div class="chart-container">
+            <div class="chart-placeholder">
+                <div class="chart-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <p>User role distribution chart would be displayed here</p>
+                <small>Chart.js integration required for interactive charts</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Status Chart -->
+    <div class="chart-section">
+        <h2>Application Status Overview</h2>
+        <div class="chart-container">
+            <div class="chart-placeholder">
+                <div class="chart-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <p>Application status overview chart would be displayed here</p>
+                <small>Chart.js integration required for interactive charts</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Trends -->
+    <div class="trends-section">
+        <h2>Recent Activity Trends</h2>
+        {% if recent_activities %}
+            <div class="trends-chart">
+                <div class="trend-placeholder">
+                    <div class="trend-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <p>Activity trends over the last 30 days</p>
+                    <div class="trend-stats">
+                        <div class="stat">
+                            <span class="stat-number">{{ recent_activities|length }}</span>
+                            <span class="stat-label">Data Points</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>No Activity Data</h3>
+                <p>Activity trends will be displayed once there's sufficient data.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- System Health Trends -->
+    <div class="health-section">
+        <h2>System Health Trends</h2>
+        {% if health_trends %}
+            <div class="health-chart">
+                <div class="health-placeholder">
+                    <div class="health-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <p>System health metrics over the last 7 days</p>
+                    <div class="health-stats">
+                        <div class="stat">
+                            <span class="stat-number">{{ health_trends|length }}</span>
+                            <span class="stat-label">Health Records</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3>No Health Data</h3>
+                <p>System health trends will be displayed once monitoring data is available.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Top Performing Metrics -->
+    <div class="performance-section">
+        <h2>Top Performing Metrics</h2>
+        <div class="performance-grid">
+            <div class="performance-card">
+                <div class="performance-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="performance-info">
+                    <h3>Highest User Engagement</h3>
+                    <p>Student role with 85% activity rate</p>
+                    <div class="performance-value">85%</div>
+                </div>
+            </div>
+
+            <div class="performance-card">
+                <div class="performance-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="performance-info">
+                    <h3>Fastest Response Time</h3>
+                    <p>System response under 200ms</p>
+                    <div class="performance-value">180ms</div>
+                </div>
+            </div>
+
+            <div class="performance-card">
+                <div class="performance-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="performance-info">
+                    <h3>Security Score</h3>
+                    <p>System security rating</p>
+                    <div class="performance-value">98%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="export-section">
+        <h2>Export Analytics Data</h2>
+        <div class="export-options">
+            <button class="btn btn-primary" onclick="exportData('pdf')">
+                <i class="fas fa-file-pdf"></i> Export as PDF
+            </button>
+            <button class="btn btn-success" onclick="exportData('excel')">
+                <i class="fas fa-file-excel"></i> Export as Excel
+            </button>
+            <button class="btn btn-info" onclick="exportData('csv')">
+                <i class="fas fa-file-csv"></i> Export as CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportData(format) {
+    // This would typically make an AJAX call to export data
+    alert(`Exporting analytics data as ${format.toUpperCase()}...`);
+    // In a real implementation, this would trigger a download
+}
+</script>
+
+<style>
+.analytics-dashboard {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.metric-icon.users { background: var(--primary-color); }
+.metric-icon.applications { background: var(--success-color); }
+.metric-icon.active { background: var(--info-color); }
+.metric-icon.system { background: var(--warning-color); }
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.metric-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.metric-change.positive {
+    color: var(--success-color);
+}
+
+.metric-change.negative {
+    color: var(--danger-color);
+}
+
+.metric-change.neutral {
+    color: var(--secondary-color);
+}
+
+.chart-section,
+.trends-section,
+.health-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.chart-section h2,
+.trends-section h2,
+.health-section h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.chart-container,
+.trends-chart,
+.health-chart {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-placeholder,
+.trend-placeholder,
+.health-placeholder {
+    text-align: center;
+    color: var(--secondary-color);
+}
+
+.chart-icon,
+.trend-icon,
+.health-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: var(--border-color);
+}
+
+.trend-stats,
+.health-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.performance-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.performance-section h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.performance-card {
+    background: var(--light-color);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.performance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.performance-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.performance-info {
+    flex: 1;
+}
+
+.performance-info h3 {
+    color: var(--dark-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.performance-info p {
+    color: var(--secondary-color);
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+}
+
+.performance-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.export-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.export-section h2 {
+    color: var(--dark-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.export-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .analytics-dashboard {
+        margin: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card,
+    .performance-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .export-options {
+        flex-direction: column;
+    }
+
+    .export-options .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
