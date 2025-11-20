@@ -1,0 +1,1 @@
+PRISM- is  platfomr for  recruitment and internship system management designed for  centeralizing  universites,companys and students during  intern program and make quality recrite and  inspect work quality.
